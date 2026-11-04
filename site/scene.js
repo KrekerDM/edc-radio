@@ -1,6 +1,7 @@
 (function () {
   const canvas = document.querySelector("canvas.scene");
   if (!canvas) return;
+  const toggle = document.querySelector(".scene-toggle");
   const W = 320;
   const H = 64;
   const ground = 52;
@@ -11,12 +12,12 @@
   const S = {
     truckA: [0, 0, 22, 14], truckB: [23, 0, 22, 14], tower: [46, 0, 11, 28], pineL: [58, 0, 11, 13],
     pineS: [70, 0, 7, 9], drift: [78, 0, 17, 3], catA: [96, 0, 12, 11], catB: [109, 0, 12, 11],
-    heart: [27, 29, 7, 6], noteA: [35, 29, 6, 7], noteB: [42, 29, 6, 7], moon: [49, 29, 9, 10],
-    blink: [64, 29, 3, 3], flake: [68, 29, 3, 3],
+    noteA: [35, 29, 6, 7], noteB: [42, 29, 6, 7], moon: [49, 29, 9, 10], blink: [64, 29, 3, 3], flake: [68, 29, 3, 3],
   };
+  const weathers = [0.25, 0.6, 1, 1, 1.5];
   let seed = 11;
   const rnd = () => {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    seed = (Math.imul(seed, 1103515245) + 12345) & 0x7fffffff;
     return seed / 0x7fffffff;
   };
   const towerX = W - 44;
@@ -33,15 +34,22 @@
     if (x > 18 && x < 40 && y < 16) continue;
     stars.push([x, y]);
   }
-  const flakes = Array.from({ length: 60 }, () => ({
+  const flakes = Array.from({ length: 72 }, () => ({
     x: rnd() * W, y: rnd() * H, fall: 5 + rnd() * 6, phase: rnd() * 6.28, near: rnd() < 0.18,
   }));
   const notes = [];
   let truck = 40;
   let time = 0;
   let noteTimer = 0;
+  let snow = 1;
+  let snowTarget = 1;
+  let weatherLeft = 60;
+  let ready = false;
+  let paused = false;
+  let visible = true;
+  let handle = 0;
+  let last = 0;
   const sprites = new Image();
-  sprites.src = "/img/sprites.png";
   const still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function sprite(name, x, y) {
@@ -66,9 +74,16 @@
     time += dt;
     truck += 14 * dt;
     if (truck > W + 2) truck = -24;
+    weatherLeft -= dt;
+    if (weatherLeft <= 0) {
+      snowTarget = weathers[Math.floor(rnd() * weathers.length)];
+      weatherLeft = 40 + rnd() * 80;
+    }
+    snow += (snowTarget - snow) * Math.min(1, dt * 0.1);
+    const wind = snow > 1.2 ? 6 + (snow - 1.2) * 20 : 2;
     for (const f of flakes) {
-      f.y += f.fall * dt;
-      f.x += (Math.sin(time * 0.9 + f.phase) * (f.near ? 5 : 3) - 2) * dt;
+      f.y += f.fall * (0.7 + 0.3 * snow) * dt;
+      f.x += (Math.sin(time * 0.9 + f.phase) * (f.near ? 5 : 3) - wind) * dt;
       if (f.y >= H) {
         f.y = -2;
         f.x = rnd() * W;
@@ -121,30 +136,63 @@
       if (n.age > 2.2 && Math.floor(n.age * 10) % 2 === 0) continue;
       sprite(n.kind, n.x, n.y);
     }
-    for (const f of flakes) {
+    const active = Math.round(flakes.length * Math.min(1, snow / 1.5));
+    for (let i = 0; i < active; i++) {
+      const f = flakes[i];
       if (f.near) sprite("flake", f.x - 1, f.y - 1);
       else dot(f.x, f.y);
     }
   }
 
-  let last = 0;
+  function running() {
+    return ready && !still && !paused && visible;
+  }
+
   function frame(now) {
-    const dt = Math.min(0.1, (now - last) / 1000 || 0);
-    last = now;
-    update(dt);
-    draw();
-    requestAnimationFrame(frame);
+    handle = 0;
+    if (!running()) return;
+    const dt = Math.min(0.1, (now - last) / 1000);
+    if (dt >= 0.03) {
+      last = now;
+      update(dt);
+      draw();
+    }
+    handle = requestAnimationFrame(frame);
+  }
+
+  function start() {
+    if (handle || !running()) return;
+    handle = requestAnimationFrame((t) => {
+      last = t;
+      handle = requestAnimationFrame(frame);
+    });
+  }
+
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver((entries) => {
+      visible = entries[entries.length - 1].isIntersecting;
+      start();
+    }).observe(canvas);
+  }
+
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      paused = !paused;
+      toggle.textContent = paused ? toggle.dataset.start : toggle.dataset.stop;
+      start();
+    });
   }
 
   sprites.onload = () => {
+    ready = true;
     if (still) {
       update(3);
       draw();
       return;
     }
-    requestAnimationFrame((t) => {
-      last = t;
-      requestAnimationFrame(frame);
-    });
+    if (toggle) toggle.hidden = false;
+    draw();
+    start();
   };
+  sprites.src = "/img/sprites.png";
 })();

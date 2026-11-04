@@ -24,10 +24,10 @@
 
 @font-face {
   font-family: "IBM Plex Mono";
-  src: url("/fonts/ibm-plex-mono-latin.woff2") format("woff2");
+  src: url("/fonts/ibm-plex-mono-latin-2.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
@@ -72,16 +72,19 @@
 
   --wrap: 64rem;
   --line-w: 3px;
-  --notch: 6px;
-  --chamfer: polygon(
-    var(--notch) 0,
-    calc(100% - var(--notch)) 0,
-    100% var(--notch),
-    100% calc(100% - var(--notch)),
-    calc(100% - var(--notch)) 100%,
-    var(--notch) 100%,
-    0 calc(100% - var(--notch)),
-    0 var(--notch)
+  --notch: polygon(
+    var(--line-w) 0,
+    calc(100% - var(--line-w)) 0,
+    calc(100% - var(--line-w)) var(--line-w),
+    100% var(--line-w),
+    100% calc(100% - var(--line-w)),
+    calc(100% - var(--line-w)) calc(100% - var(--line-w)),
+    calc(100% - var(--line-w)) 100%,
+    var(--line-w) 100%,
+    var(--line-w) calc(100% - var(--line-w)),
+    0 calc(100% - var(--line-w)),
+    0 var(--line-w),
+    var(--line-w) var(--line-w)
   );
 
   color-scheme: dark;
@@ -92,6 +95,10 @@
 *::after {
   box-sizing: border-box;
   border-radius: 0;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 html {
@@ -151,15 +158,15 @@ a {
   --title: var(--t-h2);
   position: relative;
   margin-top: var(--s-12);
-  padding: calc(var(--title) + var(--s-6)) var(--s-6) var(--s-6);
+  padding: 0 var(--s-6) var(--s-6);
 }
 
 .pane::before {
   content: "";
   position: absolute;
-  inset: calc(var(--title) / 2 - var(--line-w) / 2) 0 0;
+  inset: calc(var(--title) * 0.625 - var(--line-w) / 2) 0 0;
   border: var(--line-w) solid var(--line);
-  clip-path: var(--chamfer);
+  clip-path: var(--notch);
   pointer-events: none;
 }
 
@@ -169,19 +176,18 @@ a {
 }
 
 .pane > .title {
-  position: absolute;
-  top: 0;
-  left: var(--s-6);
+  position: relative;
   z-index: 1;
-  max-width: calc(100% - 2 * var(--s-6));
-  margin: 0;
+  display: table;
+  max-width: 100%;
+  margin: 0 0 var(--s-6);
   padding: 0 var(--s-2);
   background: var(--ground);
   font-family: var(--font-pixel);
   font-size: var(--title);
-  line-height: 1;
+  line-height: 1.25;
   font-weight: 600;
-  white-space: nowrap;
+  text-wrap: balance;
 }
 
 .pane > .version {
@@ -197,6 +203,15 @@ a {
   color: var(--text-soft);
 }
 
+h3 {
+  margin: 0 0 var(--s-3);
+  font-family: var(--font-pixel);
+  font-size: var(--t-body);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text);
+}
+
 p {
   margin: 0 0 var(--s-4);
   max-width: 64ch;
@@ -205,7 +220,7 @@ p {
 
 .lead {
   color: var(--text);
-  font-size: 1.125rem;
+  font-weight: 500;
 }
 
 .actions {
@@ -221,12 +236,15 @@ p {
   isolation: isolate;
   display: inline-block;
   padding: var(--s-2) var(--s-4);
+  border: 0;
+  background: transparent;
   font-family: var(--font-pixel);
   font-size: var(--t-body);
   font-weight: 500;
   line-height: 1.5;
   color: var(--text);
   text-decoration: none;
+  cursor: pointer;
 }
 
 .button::before {
@@ -235,7 +253,7 @@ p {
   inset: 0;
   z-index: -1;
   border: var(--line-w) solid var(--line);
-  clip-path: var(--chamfer);
+  clip-path: var(--notch);
 }
 
 .button:hover,
@@ -257,7 +275,13 @@ p {
 }
 
 .meta {
+  margin-bottom: var(--s-2);
   font-family: var(--font-mono);
+  font-size: var(--t-small);
+  color: var(--text-dim);
+}
+
+.note {
   font-size: var(--t-small);
   color: var(--text-dim);
 }
@@ -270,6 +294,10 @@ p {
   width: auto;
 }
 
+.columns .shot img {
+  image-rendering: auto;
+}
+
 .shot figcaption {
   margin-top: var(--s-2);
   font-size: var(--t-small);
@@ -277,15 +305,19 @@ p {
 }
 
 .scene {
-  width: 100%;
+  width: 640px;
   aspect-ratio: 320 / 64;
   margin-top: var(--s-2);
   background: var(--ground) url("/img/scene.png") center / 100% auto no-repeat;
 }
 
+.scene-toggle {
+  margin-top: var(--s-4);
+}
+
 .columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
   gap: var(--s-8);
   align-items: start;
 }
@@ -305,6 +337,12 @@ li::marker {
   color: var(--text);
 }
 
+code {
+  font-family: var(--font-mono);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
 table {
   width: 100%;
   margin: 0 0 var(--s-4);
@@ -312,14 +350,22 @@ table {
   color: var(--text-soft);
 }
 
+th,
 td {
   padding: var(--s-2) var(--s-3) var(--s-2) 0;
   vertical-align: baseline;
   border-top: 1px solid var(--text-dim);
+  text-align: left;
+  font-weight: 400;
 }
 
-tr:last-child td {
+tr:last-child > * {
   border-bottom: 1px solid var(--text-dim);
+}
+
+th.num {
+  padding-right: var(--s-4);
+  text-align: right;
 }
 
 .num {
@@ -327,6 +373,11 @@ tr:last-child td {
   font-variant-numeric: tabular-nums;
   color: var(--text);
   white-space: nowrap;
+}
+
+.groups {
+  display: grid;
+  gap: var(--s-6);
 }
 
 .keys {
@@ -345,11 +396,13 @@ tr:last-child td {
   order: 1;
   flex: 1;
   min-width: var(--s-6);
-  border-bottom: var(--line-w) dotted var(--text-dim);
+  height: var(--line-w);
+  background: linear-gradient(90deg, var(--text-dim) 50%, transparent 0) 0 0 / calc(2 * var(--line-w)) var(--line-w) repeat-x;
 }
 
 .keys dt {
   order: 0;
+  white-space: nowrap;
 }
 
 .keys dd {
@@ -386,11 +439,6 @@ footer p {
     --title: var(--t-h2);
   }
 
-  .pane > .title {
-    left: var(--s-4);
-    max-width: calc(100% - 2 * var(--s-4));
-  }
-
   .pane > .version {
     right: var(--s-4);
   }
@@ -407,5 +455,56 @@ footer p {
 
   .keys dd {
     margin-left: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  .button {
+    forced-color-adjust: none;
+    color: LinkText;
+  }
+
+  .button::before {
+    border-color: LinkText;
+  }
+
+  .button:hover,
+  .button.primary {
+    color: Canvas;
+  }
+
+  .button:hover::before,
+  .button.primary::before {
+    background: LinkText;
+  }
+
+  .button.primary:hover {
+    color: LinkText;
+  }
+
+  .button.primary:hover::before {
+    background: Canvas;
+  }
+}
+
+@media print {
+  :root {
+    --ground: #ffffff;
+    --text: #000000;
+    --text-soft: #000000;
+    --text-dim: #444444;
+    --line: #000000;
+  }
+
+  .pane > .title,
+  .pane > .version {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .actions,
+  .scene,
+  .scene-toggle {
+    display: none;
   }
 }

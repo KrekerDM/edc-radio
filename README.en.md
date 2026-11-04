@@ -1,10 +1,11 @@
-[Русский](README.md) · **English**
+[Русский](README.md) · **English** · [website](https://edc-radio-site.vercel.app/en/)
 
 # EDC Radio
 
 EDC Radio is a Windows radio that plays the Easy Delivery Co. soundtrack as
-radio stations, like the receiver in the truck cab. The frequencies and track
-order match the in-game radio. The window is drawn with the game's own fonts
+radio stations, like the receiver in the truck cab. Six stations sit on the
+in-game radio frequencies with the same track order, and the seventh is the
+player's own. The window is drawn with the game's own fonts
 and icons. The player reads them from the installed game at launch and copies
 nothing to disk. On top of a game it can sit as a see-through strip that lets
 clicks pass.
@@ -45,7 +46,7 @@ screen. Jumping to the next station crackles for 0.35 seconds.
 - **Volume** moves in 5 % steps with the up and down arrows, or with the
   mouse wheel anywhere off the dial.
 
-![Tape](docs/screenshot-tape.png)
+![Tape](docs/screenshot-tape-en.png)
 
 ## Overlay on top of a game
 
@@ -73,7 +74,7 @@ holds always on top without the overlay, mini mode for the normal window,
 glow, the tray icon, language and scale. Mini mode also comes on with the
 M key or the `-` in the title bar.
 
-![Settings](docs/screenshot-settings.png)
+![Settings](docs/screenshot-settings-en.png)
 
 ## Steam soundtrack or your folder
 

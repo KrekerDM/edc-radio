@@ -14,19 +14,19 @@ edc-radio
 Русский:
 
 ```
-Радио для Windows с саундтреком Easy Delivery Co. Семь станций на частотах из игры, эфир по часам, шум между станциями, кассета, сон и оверлей поверх игры по Ctrl+Alt+O. Музыку берёт из Steam или из Вашей папки, шрифты и иконки читает из установленной игры. Русский и английский интерфейс, готовый exe.
+Радио из кабины Easy Delivery Co. для Windows. Семь станций, шесть из них на частотах из игры, эфир по часам, шум между станциями, кассета, сон и оверлей поверх игры по Ctrl+Alt+O. Музыку берёт из Steam или из Вашей папки, шрифты и иконки читает из установленной игры. Русский и английский интерфейс, готовый exe.
 ```
 
 Английский:
 
 ```
-A Windows radio for the Easy Delivery Co. soundtrack. Seven stations on the in-game frequencies, a clock-driven broadcast, static between stations, tape, sleep and an overlay on top of the game with Ctrl+Alt+O. Music comes from Steam or your folder, fonts and icons from the installed game. Russian and English UI, ready-made exe.
+The Easy Delivery Co. truck radio for Windows. Seven stations, six of them on the in-game frequencies, a clock-driven broadcast, static between stations, tape, sleep and an overlay on top of the game with Ctrl+Alt+O. Music comes from Steam or your folder, fonts and icons from the installed game. Russian and English UI, ready-made exe.
 ```
 
 ## Website
 
 ```
-https://github.com/KrekerDM/edc-radio/releases/latest
+https://edc-radio-site.vercel.app/
 ```
 
 ## Topics
@@ -48,16 +48,24 @@ russian
 
 ## Сайт
 
-Страница проекта лежит в `site/`: HTML, CSS, шрифты и картинки, сборка не
-нужна. Проект в Vercel настраивается так:
+Сайт работает по адресу https://edc-radio-site.vercel.app/, английская
+версия — https://edc-radio-site.vercel.app/en/. Страница лежит в `site/`:
+HTML, CSS, шрифты и картинки, сборка не нужна. Проект в Vercel настроен так:
 
 - Root Directory — `site`;
 - Framework Preset — Other;
 - Build Command и Output Directory — пустые.
 
-`site/vercel.json` убирает `.html` из адресов и задаёт кэш для шрифтов и
-картинок. Когда сайт заработает, его адрес ставится в поле Website вместо
-ссылки на релизы.
+Каждый push в `main` выкладывает сайт заново. `site/vercel.json` убирает
+`.html` из адресов и задаёт кэш для шрифтов и картинок, `site/404.html`
+открывается на неизвестных адресах. Если адрес сайта поменяется, его нужно
+заменить в `canonical`, `hreflang` и `og:` обеих страниц.
+
+Шрифты Vercel отдаёт с кэшем на год, картинки на неделю. Поэтому изменённый
+шрифт или лист спрайтов кладётся под новым именем, например
+`ibm-plex-mono-latin-2.woff2`, а ссылки в `style.css`, `scene.js` и `<head>`
+меняются в том же коммите. Таблица спрайтов в `scene.js` повторяет
+`src/EdcRadio/Sprites.cs`, и после `tools/make_sprites.py` её нужно сверить.
 
 ## Настройки репозитория
 

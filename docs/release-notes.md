@@ -74,8 +74,8 @@ Fixes after a bug hunt.
 
 ## Что есть
 
-- **7 станций** на частотах радио из игры, 88.1–107.9 МГц, шаг 0,1 МГц. Эфир
-  идёт по часам с 1 января 2025 года по UTC.
+- **7 станций**, 88.1–107.9 МГц, шаг 0,1 МГц: шесть на частотах радио из игры
+  и своя 107.9. Эфир идёт по часам с 1 января 2025 года по UTC.
 - **Шум между станциями**, помехи на слабом сигнале и треск 0,35 секунды при
   переходе на соседнюю станцию. Станция ловится в пределах 0,4 МГц.
 - **Кассета** — альбом по порядку, сторона A и сторона B, номер трека
@@ -106,8 +106,9 @@ Windows SmartScreen может предупредить о неизвестно�
 
 First release.
 
-- **7 stations** on the in-game radio frequencies, 88.1 to 107.9 MHz in
-  0.1 MHz steps. The broadcast follows the clock from 1 January 2025 UTC.
+- **7 stations**, 88.1 to 107.9 MHz in 0.1 MHz steps: six on the in-game
+  radio frequencies and the player's own 107.9. The broadcast follows the clock
+  from 1 January 2025 UTC.
 - **Static between stations**, interference on a weak signal and a 0.35 second
   crackle when jumping to the next station. A station comes in within 0.4 MHz.
 - **Tape** plays the album in order, side A and side B, and keeps the track

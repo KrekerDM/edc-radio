@@ -3,17 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EDC Radio — радио с саундтреком Easy Delivery Co.</title>
-  <meta name="description" content="Радио для Windows с саундтреком Easy Delivery Co.: семь станций на частотах из игры, эфир по часам, шум между станциями, кассета, сон и оверлей поверх игры.">
+  <title>EDC Radio — радио из кабины Easy Delivery Co. для Windows</title>
+  <meta name="description" content="Радио из кабины Easy Delivery Co. для Windows: семь станций, эфир по часам, кассета и оверлей поверх игры. Музыку берёт из Steam или из Вашей папки.">
   <meta property="og:title" content="EDC Radio">
-  <meta property="og:description" content="Радио для Windows с саундтреком Easy Delivery Co.: семь станций, эфир по часам и оверлей поверх игры.">
-  <meta property="og:image" content="https://raw.githubusercontent.com/KrekerDM/edc-radio/main/site/img/og.png">
+  <meta property="og:description" content="Радио из кабины Easy Delivery Co. для Windows: семь станций, эфир по часам и оверлей поверх игры. Музыку берёт из Steam или из Вашей папки.">
+  <meta property="og:url" content="https://edc-radio-site.vercel.app/">
+  <meta property="og:image" content="https://edc-radio-site.vercel.app/img/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Окно плеера EDC Radio: частота 99.9, станция лоу-фай и сценка с грузовиком на ночной дороге">
   <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image:alt" content="Окно плеера EDC Radio: частота 99.9, станция лоу-фай и сценка с грузовиком на ночной дороге">
   <meta name="theme-color" content="#000000">
   <link rel="icon" href="/favicon.ico">
-  <link rel="alternate" hreflang="en" href="/en/">
+  <link rel="canonical" href="https://edc-radio-site.vercel.app/">
+  <link rel="alternate" hreflang="ru" href="https://edc-radio-site.vercel.app/">
+  <link rel="alternate" hreflang="en" href="https://edc-radio-site.vercel.app/en/">
+  <link rel="alternate" hreflang="x-default" href="https://edc-radio-site.vercel.app/en/">
   <link rel="preload" href="/fonts/ibm-plex-sans-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/pixelify-sans-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/pixelify-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -26,12 +38,13 @@
     <main>
       <section class="pane pane-hero" aria-labelledby="hero">
         <h1 class="title" id="hero">EDC Radio</h1>
-        <p class="lead">Радио для Windows с саундтреком Easy Delivery Co. Семь станций на частотах из игры, эфир по часам, шум между станциями и оверлей поверх игры.</p>
+        <p class="lead">Радио из кабины Easy Delivery Co. для Windows. Семь станций, эфир по часам, шум между станциями и оверлей поверх игры. Музыку плеер берёт из Steam или из Вашей папки.</p>
         <div class="actions">
           <a class="button primary" href="https://github.com/KrekerDM/edc-radio/releases/latest/download/EdcRadio.exe">скачать EdcRadio.exe</a>
           <a class="button" href="https://github.com/KrekerDM/edc-radio">исходники на GitHub</a>
         </div>
         <p class="meta">Windows 10 и 11, 64 бита · 66 МБ · .NET внутри exe</p>
+        <p class="note">Сборка не подписана, поэтому SmartScreen при первом запуске предупредит о неизвестном издателе. Нажмите «Подробнее», потом «Выполнить в любом случае».</p>
         <figure class="shot">
           <img src="/img/screenshot-main.png" width="640" height="416" alt="Окно плеера: частота 99.9, станция лоу-фай, шкала 88–108 МГц, трек и сценка с грузовиком на ночной дороге">
           <figcaption>Снято без установленной игры, своим набором спрайтов. С игрой окно рисуется её шрифтами и иконками.</figcaption>
@@ -40,16 +53,16 @@
       </section>
 
       <section class="pane" aria-labelledby="stations">
-        <h2 class="title" id="stations">Станции 88.1–107.9</h2>
-        <p>Частоты и порядок треков те же, что у радио в кабине. Станция ловится в пределах 0,4 МГц, между станциями шум и точки помех.</p>
+        <h2 class="title" id="stations">Станции 88.1–107.9 МГц</h2>
+        <p>Шесть станций стоят на частотах радио из кабины, с тем же порядком треков. Седьмая, 107.9, своя: на ней два трека, которые в игре по радио не звучат. Станция ловится в пределах 0,4 МГц, между станциями шум и точки помех на экране.</p>
         <table>
-          <tr><td class="num">88.1</td><td>своё радио — файлы из папки CustomRadio игры</td></tr>
-          <tr><td class="num">91.1</td><td>радио ЛегКо — Rainless по кругу</td></tr>
-          <tr><td class="num">99.1</td><td>EZ News — новости выходят только в кабине, здесь бегущая строка</td></tr>
-          <tr><td class="num">99.9</td><td>лоу-фай — 9 треков Sohaoying на 10 местах</td></tr>
-          <tr><td class="num">101.7</td><td>драм-н-бейс — 10 треков pr0te</td></tr>
-          <tr><td class="num">104.9</td><td>ралли — 6 треков Sohaoying</td></tr>
-          <tr><td class="num">107.9</td><td>после смены — Shut Down и Rainless (Hum)</td></tr>
+          <tr><th scope="row" class="num">88.1</th><td>своё радио — Ваши файлы из папки CustomRadio игры, если Вы их туда положили</td></tr>
+          <tr><th scope="row" class="num">91.1</th><td>радио ЛегКо — Rainless по кругу</td></tr>
+          <tr><th scope="row" class="num">99.1</th><td>EZ News — новости выходят только в кабине, здесь шум и бегущая строка</td></tr>
+          <tr><th scope="row" class="num">99.9</th><td>лоу-фай — 9 треков Sohaoying на 10 местах, Easily Delivered or Whatever звучит дважды</td></tr>
+          <tr><th scope="row" class="num">101.7</th><td>драм-н-бейс — 10 треков pr0te</td></tr>
+          <tr><th scope="row" class="num">104.9</th><td>ралли — 6 треков Sohaoying</td></tr>
+          <tr><th scope="row" class="num">107.9</th><td>после смены — Shut Down и Rainless (Hum), частота плеера</td></tr>
         </table>
         <p>Эфир считается от 1 января 2025 года по UTC. При включении песня обычно уже идёт, а два плеера на разных компьютерах звучат одинаково с точностью до секунды.</p>
       </section>
@@ -60,8 +73,8 @@
           <ul>
             <li>Кассета играет альбом по порядку. Сторона A — 22 трека первого диска, сторона B — 6 треков второго.</li>
             <li>Скан переходит на следующую станцию каждые 6 секунд.</li>
-            <li>Сон на 15, 30 или 60 минут, звук затихает за 10 секунд.</li>
-            <li>Кнопки 1–7 включают станции, как кнопки памяти на автомагнитоле.</li>
+            <li>Сон на 15, 30 или 60 минут. Последние 10 секунд звук затихает, потом плеер встаёт на паузу.</li>
+            <li>Клавиши 1–7 включают станции, как кнопки памяти на автомагнитоле.</li>
           </ul>
           <figure class="shot">
             <img src="/img/screenshot-tape.png" width="640" height="416" alt="Режим кассеты: на дисплее A-01, нарисована кассета с катушками">
@@ -82,33 +95,50 @@
             </ul>
           </div>
           <figure class="shot">
-            <img src="/img/screenshot-settings.png" width="640" height="416" alt="Окно настроек: оверлей, фон, мини, клики сквозь, поверх окон, свечение, трей, язык, масштаб">
+            <img src="/img/screenshot-settings.png" width="640" height="416" alt="Окно настроек: оверлей, фон в оверлее 30 %, мини в оверлее, клики сквозь оверлей, поверх окон, мини-режим, свечение экрана, значок в трее, язык и масштаб">
           </figure>
         </div>
       </section>
 
       <section class="pane" aria-labelledby="keys">
         <h2 class="title" id="keys">Клавиши</h2>
-        <dl class="keys">
-          <div><dt><kbd>← →</kbd></dt><dd>частота ±0,1 МГц</dd></div>
-          <div><dt><kbd>Ctrl + ← →</kbd></dt><dd>соседняя станция или трек</dd></div>
-          <div><dt><kbd>↑ ↓</kbd></dt><dd>громкость ±5 %</dd></div>
-          <div><dt><kbd>пробел</kbd></dt><dd>пауза</dd></div>
-          <div><dt><kbd>1–7</kbd></dt><dd>станции по порядку</dd></div>
-          <div><dt><kbd>T</kbd> <kbd>A</kbd> <kbd>S</kbd></dt><dd>кассета, скан, сон</dd></div>
-          <div><dt><kbd>Ctrl+Alt + O</kbd></dt><dd>оверлей, даже в игре</dd></div>
-          <div><dt><kbd>Ctrl+Alt + H</kbd></dt><dd>показать или скрыть окно</dd></div>
-        </dl>
+        <div class="groups">
+          <div>
+            <h3>в окне</h3>
+            <dl class="keys">
+              <div><dt><kbd>← →</kbd></dt><dd>частота ±0,1 МГц</dd></div>
+              <div><dt><kbd>Ctrl + ← →</kbd></dt><dd>соседняя станция или трек</dd></div>
+              <div><dt><kbd>↑ ↓</kbd></dt><dd>громкость ±5 %</dd></div>
+              <div><dt><kbd>пробел</kbd></dt><dd>пауза</dd></div>
+              <div><dt><kbd>1–7</kbd></dt><dd>станции по порядку</dd></div>
+              <div><dt><kbd>T</kbd> <kbd>A</kbd> <kbd>S</kbd></dt><dd>кассета, скан, сон</dd></div>
+              <div><dt><kbd>G</kbd> <kbd>M</kbd></dt><dd>свечение, мини-режим</dd></div>
+              <div><dt><kbd>F1</kbd></dt><dd>все клавиши в окне</dd></div>
+            </dl>
+          </div>
+          <div>
+            <h3>везде, даже в игре</h3>
+            <dl class="keys">
+              <div><dt><kbd>Ctrl+Alt + пробел</kbd></dt><dd>пауза</dd></div>
+              <div><dt><kbd>Ctrl+Alt + ← →</kbd></dt><dd>соседняя станция или трек</dd></div>
+              <div><dt><kbd>Ctrl+Alt + ↑ ↓</kbd></dt><dd>громкость</dd></div>
+              <div><dt><kbd>Ctrl+Alt + O</kbd></dt><dd>оверлей</dd></div>
+              <div><dt><kbd>Ctrl+Alt + M</kbd></dt><dd>мини-режим</dd></div>
+              <div><dt><kbd>Ctrl+Alt + H</kbd></dt><dd>показать или скрыть окно</dd></div>
+            </dl>
+          </div>
+        </div>
       </section>
 
       <section class="pane" aria-labelledby="scene">
         <h2 class="title" id="scene">Сценка внизу окна</h2>
-        <p>Грузовик едет по ночной дороге, пока играет музыка, со скоростью от 10 до 34 точек в секунду, смотря по станции. С 18:00 до 7:00 горят фары, на небе луна и звёзды. Кот у радиовышки качает головой в такт, а снег раз в 40–120 секунд меняется от редких снежинок до метели.</p>
+        <p>Пока играет музыка, грузовик едет по ночной дороге со скоростью от 10 до 34 точек в секунду, смотря по станции. С 18:00 до 7:00 горят фары, на небе луна и звёзды. Кот у радиовышки качает головой в такт, а снег раз в 40–120 секунд меняется от редких снежинок до метели.</p>
         <canvas class="scene" width="320" height="64" role="img" aria-label="Грузовик едет по ночной дороге мимо радиовышки, рядом сидит кот, идёт снег"></canvas>
+        <button class="button scene-toggle" type="button" hidden data-stop="остановить сценку" data-start="запустить сценку">остановить сценку</button>
       </section>
 
       <section class="pane" aria-labelledby="music">
-        <h2 class="title" id="music">Откуда музыка</h2>
+        <h2 class="title" id="music">Саундтрек из Steam и своя папка</h2>
         <div class="columns">
           <div>
             <p>Музыки в плеере нет, и по диску он её не ищет. Источника три:</p>
@@ -117,11 +147,11 @@
               <li>папка, которую Вы укажете кнопкой «папка»;</li>
               <li>папка CustomRadio игры для станции 88.1.</li>
             </ul>
-            <p>Без музыки окно предлагает указать папку или открыть страницу саундтрека в Steam.</p>
+            <p>Форматы FLAC, WAV, M4A, MP3 и WMA. Без музыки окно предлагает указать папку или открыть страницу саундтрека в Steam.</p>
             <p><a href="https://store.steampowered.com/app/3994280">Саундтрек в Steam</a></p>
           </div>
           <figure class="shot">
-            <img src="/img/screenshot-empty.png" width="640" height="416" alt="Окно без музыки: кнопки указать папку и саундтрек в Steam">
+            <img src="/img/screenshot-empty.png" width="640" height="416" alt="Окно без музыки: надпись «музыки пока нет» и кнопки «указать папку» и «саундтрек в Steam»">
           </figure>
         </div>
       </section>
@@ -130,7 +160,7 @@
         <h2 class="title" id="broken">Если что-то сломалось</h2>
         <ul>
           <li>Трек, который не открылся, станция пропускает, а его имя видно в строке состояния.</li>
-          <li>При падении плеер сохраняет настройки и пишет отчёт в <code class="num">%APPDATA%\EdcRadio\crash.log</code>.</li>
+          <li>При падении плеер сохраняет настройки и пишет отчёт в <code>%APPDATA%\EdcRadio\crash.log</code>.</li>
           <li>Испорченный settings.json плеер оставляет рядом как settings.json.bad и запускается с настройками по умолчанию.</li>
         </ul>
         <p><a href="https://github.com/KrekerDM/edc-radio/issues/new/choose">Сообщить об ошибке</a>: форма спросит версию, Windows и откуда музыка. Если есть crash.log, приложите его.</p>
@@ -139,11 +169,10 @@
       <section class="pane" aria-labelledby="limits">
         <h2 class="title" id="limits">Чего плеер не делает</h2>
         <ul>
-          <li>Не содержит музыки и графики игры. Шрифты и иконки он читает с компьютера, где игра установлена, только на чтение.</li>
+          <li>Не содержит музыки и графики игры. Шрифты и иконки он берёт из установленной игры и открывает её файлы только на чтение.</li>
           <li>Не меняет файлы игры и Steam.</li>
-          <li>Не виден поверх игр в эксклюзивном полноэкранном режиме, работает с окном и окном без рамки.</li>
-          <li>Сборка не подписана, поэтому SmartScreen при первом запуске предупредит о неизвестном издателе.</li>
-          <li>Это не официальная программа, автор игры и композиторы к ней отношения не имеют.</li>
+          <li>Оверлей не виден поверх игр в эксклюзивном полноэкранном режиме. Он работает с играми в окне и в окне без рамки.</li>
+          <li>Это не официальная программа: автор игры и композиторы к ней отношения не имеют.</li>
         </ul>
       </section>
     </main>

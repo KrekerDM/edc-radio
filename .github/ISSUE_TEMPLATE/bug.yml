@@ -52,5 +52,4 @@ body:
     id: crash
     attributes:
       label: crash.log
-      description: Если плеер упал, приложите %APPDATA%\EdcRadio\crash.log / If the player crashed, attach %APPDATA%\EdcRadio\crash.log
-      render: text
+      description: Если плеер упал, перетащите сюда файл %APPDATA%\EdcRadio\crash.log или вставьте его текст / If the player crashed, drop %APPDATA%\EdcRadio\crash.log here or paste its text
