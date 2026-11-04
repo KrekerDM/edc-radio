@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EDC Radio, a radio for the Easy Delivery Co. soundtrack</title>
+  <meta name="description" content="A Windows radio for the Easy Delivery Co. soundtrack: seven stations on the in-game frequencies, a clock-driven broadcast, static between stations, tape, sleep and an overlay on top of the game.">
+  <meta property="og:title" content="EDC Radio">
+  <meta property="og:description" content="A Windows radio for the Easy Delivery Co. soundtrack: seven stations, a clock-driven broadcast and an overlay on top of the game.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/KrekerDM/edc-radio/main/site/img/og.png">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="alternate" hreflang="ru" href="/">
+  <link rel="preload" href="/fonts/ibm-plex-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/pixelify-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <nav class="top" aria-label="Language and source">
+      <a href="/" hreflang="ru" lang="ru">Русский</a>
+      <a href="https://github.com/KrekerDM/edc-radio">GitHub</a>
+    </nav>
+
+    <main>
+      <section class="pane pane-hero" aria-labelledby="hero">
+        <h1 class="title" id="hero">EDC Radio</h1>
+        <p class="lead">A Windows radio for the Easy Delivery Co. soundtrack. Seven stations on the in-game frequencies, a clock-driven broadcast, static between stations and an overlay on top of the game.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/KrekerDM/edc-radio/releases/latest/download/EdcRadio.exe">download EdcRadio.exe</a>
+          <a class="button" href="https://github.com/KrekerDM/edc-radio">source on GitHub</a>
+        </div>
+        <p class="meta">Windows 10 and 11, 64-bit · 66 MB · .NET inside the exe</p>
+        <figure class="shot">
+          <img src="/img/screenshot-main-en.png" width="640" height="416" alt="The player window: frequency 99.9, the lo-fi station, an 88 to 108 MHz dial, the track and a scene with a truck on a night road">
+          <figcaption>Captured without the game installed, with the built-in sprites. With the game the window uses its fonts and icons.</figcaption>
+        </figure>
+        <span class="version">v1.0.1</span>
+      </section>
+
+      <section class="pane" aria-labelledby="stations">
+        <h2 class="title" id="stations">Stations 88.1–107.9</h2>
+        <p>The frequencies and track order match the radio in the cab. A station comes in within 0.4 MHz, and between stations there is static with noise dots.</p>
+        <table>
+          <tr><td class="num">88.1</td><td>your radio, files from the game's CustomRadio folder</td></tr>
+          <tr><td class="num">91.1</td><td>EasyCo radio loops Rainless</td></tr>
+          <tr><td class="num">99.1</td><td>EZ News airs in the cab only, here you get a ticker</td></tr>
+          <tr><td class="num">99.9</td><td>lo-fi, 9 Sohaoying tracks in 10 slots</td></tr>
+          <tr><td class="num">101.7</td><td>drum and bass, 10 pr0te tracks</td></tr>
+          <tr><td class="num">104.9</td><td>rally, 6 Sohaoying tracks</td></tr>
+          <tr><td class="num">107.9</td><td>after hours, Shut Down and Rainless (Hum)</td></tr>
+        </table>
+        <p>The broadcast counts from 1 January 2025 UTC. A song is usually already playing when you tune in, and two players on two computers stay within a second of each other.</p>
+      </section>
+
+      <section class="pane" aria-labelledby="tape">
+        <h2 class="title" id="tape">Tape, scan, sleep</h2>
+        <div class="columns">
+          <ul>
+            <li>Tape plays the album in order. Side A is the 22 tracks of disc 1, side B the 6 tracks of disc 2.</li>
+            <li>Scan moves to the next station every 6 seconds.</li>
+            <li>Sleep runs 15, 30 or 60 minutes and fades out over 10 seconds.</li>
+            <li>Keys 1 to 7 pick the stations, like preset buttons on a car radio.</li>
+          </ul>
+          <figure class="shot">
+            <img src="/img/screenshot-tape.png" width="640" height="416" alt="Tape mode: the display shows A-01 and a cassette with reels">
+          </figure>
+        </div>
+      </section>
+
+      <section class="pane" aria-labelledby="overlay">
+        <h2 class="title" id="overlay">Overlay on a game</h2>
+        <div class="columns">
+          <div>
+            <p>Ctrl+Alt+O turns the window into a strip above all windows. The Ctrl+Alt keys work while a game has focus.</p>
+            <ul>
+              <li>The black behind the lines is 0, 30, 60 or 100 % opaque, and the glow stays.</li>
+              <li>Mini mode is 320 by 64 pixels with the frequency, station, track and time.</li>
+              <li>Clicks pass through the strip into the game.</li>
+              <li>A tray icon with a menu and a settings window laid out like the game's settings.</li>
+            </ul>
+          </div>
+          <figure class="shot">
+            <img src="/img/screenshot-settings.png" width="640" height="416" alt="The settings window with overlay, background, mini, clicks pass through, always on top, glow, tray, language and scale">
+          </figure>
+        </div>
+      </section>
+
+      <section class="pane" aria-labelledby="keys">
+        <h2 class="title" id="keys">Keys</h2>
+        <dl class="keys">
+          <div><dt><kbd>← →</kbd></dt><dd>frequency ±0.1 MHz</dd></div>
+          <div><dt><kbd>Ctrl + ← →</kbd></dt><dd>previous or next station or track</dd></div>
+          <div><dt><kbd>↑ ↓</kbd></dt><dd>volume ±5 %</dd></div>
+          <div><dt><kbd>Space</kbd></dt><dd>pause</dd></div>
+          <div><dt><kbd>1–7</kbd></dt><dd>stations in order</dd></div>
+          <div><dt><kbd>T</kbd> <kbd>A</kbd> <kbd>S</kbd></dt><dd>tape, scan, sleep</dd></div>
+          <div><dt><kbd>Ctrl+Alt + O</kbd></dt><dd>overlay, even in a game</dd></div>
+          <div><dt><kbd>Ctrl+Alt + H</kbd></dt><dd>show or hide the window</dd></div>
+        </dl>
+      </section>
+
+      <section class="pane" aria-labelledby="scene">
+        <h2 class="title" id="scene">The scene</h2>
+        <p>The truck drives along a night road while music plays, at 10 to 34 pixels a second depending on the station. From 18:00 to 7:00 the headlights are on and the moon and stars are out. The cat at the radio tower nods to the beat, and every 40 to 120 seconds the snow shifts between a few flakes and a blizzard.</p>
+        <canvas class="scene" width="320" height="64" role="img" aria-label="A truck drives along a night road past a radio tower with a cat beside it while snow falls"></canvas>
+      </section>
+
+      <section class="pane" aria-labelledby="music">
+        <h2 class="title" id="music">Where the music comes from</h2>
+        <div class="columns">
+          <div>
+            <p>The player contains no music and does not search your disk for it. There are three sources:</p>
+            <ul>
+              <li>the Steam soundtrack, app 3994280, found on its own when installed;</li>
+              <li>a folder you pick with the "folder" button;</li>
+              <li>the game's CustomRadio folder for station 88.1.</li>
+            </ul>
+            <p>Without music the window offers to pick a folder or to open the soundtrack page on Steam.</p>
+            <p><a href="https://store.steampowered.com/app/3994280">The soundtrack on Steam</a></p>
+          </div>
+          <figure class="shot">
+            <img src="/img/screenshot-empty-en.png" width="640" height="416" alt="The window without music: pick a folder and soundtrack on Steam buttons">
+          </figure>
+        </div>
+      </section>
+
+      <section class="pane" aria-labelledby="broken">
+        <h2 class="title" id="broken">If something breaks</h2>
+        <ul>
+          <li>A track that does not open is skipped, and its name shows in the status line.</li>
+          <li>On a crash the player saves its settings and writes a report to <code class="num">%APPDATA%\EdcRadio\crash.log</code>.</li>
+          <li>A damaged settings.json is kept next to it as settings.json.bad, and the player starts with default settings.</li>
+        </ul>
+        <p><a href="https://github.com/KrekerDM/edc-radio/issues/new/choose">Report a bug</a>: the form asks for the version, Windows and where the music comes from. If there is a crash.log, attach it.</p>
+      </section>
+
+      <section class="pane" aria-labelledby="limits">
+        <h2 class="title" id="limits">What it does not do</h2>
+        <ul>
+          <li>It contains no music and no game graphics. It reads the fonts and icons read-only from a computer where the game is installed.</li>
+          <li>It changes nothing in the game or Steam files.</li>
+          <li>The overlay does not show over games in exclusive fullscreen. It works with windowed and borderless games.</li>
+          <li>The build is not signed, so SmartScreen warns about an unknown publisher on the first run.</li>
+          <li>It is not an official program. The game's author and the composers have nothing to do with it.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>The code is under the MIT license. The music belongs to Sohaoying and pr0te. Easy Delivery Co. and its graphics belong to its author.</p>
+      <p><a href="https://github.com/KrekerDM/edc-radio/releases">Releases</a> · fonts IBM Plex and Pixelify Sans under the SIL OFL 1.1</p>
+    </footer>
+  </div>
+  <script src="/scene.js" defer></script>
+</body>
+</html>

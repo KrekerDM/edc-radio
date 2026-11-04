@@ -1,0 +1,411 @@
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/ibm-plex-sans-cyrillic.woff2") format("woff2");
+  font-weight: 100 700;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/ibm-plex-sans-latin.woff2") format("woff2");
+  font-weight: 100 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/ibm-plex-mono-cyrillic.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/ibm-plex-mono-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("/fonts/pixelify-sans-cyrillic.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("/fonts/pixelify-sans-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2195, U+2212, U+FEFF, U+FFFD;
+}
+
+:root {
+  --ground: #000000;
+  --text: #ffffff;
+  --text-soft: #d6d6d6;
+  --text-dim: #a3a3a3;
+  --line: #ffffff;
+
+  --font: "IBM Plex Sans", system-ui, sans-serif;
+  --font-pixel: "Pixelify Sans", "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --t-h1: 2rem;
+  --t-h2: 1.5rem;
+  --t-body: 1rem;
+  --t-small: 0.875rem;
+
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-6: 1.5rem;
+  --s-8: 2rem;
+  --s-12: 3rem;
+
+  --wrap: 64rem;
+  --line-w: 3px;
+  --notch: 6px;
+  --chamfer: polygon(
+    var(--notch) 0,
+    calc(100% - var(--notch)) 0,
+    100% var(--notch),
+    100% calc(100% - var(--notch)),
+    calc(100% - var(--notch)) 100%,
+    var(--notch) 100%,
+    0 calc(100% - var(--notch)),
+    0 var(--notch)
+  );
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+html {
+  background: var(--ground);
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--t-body);
+  line-height: 1.6;
+}
+
+img,
+canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+:focus-visible {
+  outline: var(--line-w) solid var(--text);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--text);
+  color: var(--ground);
+}
+
+.wrap {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding: var(--s-6) var(--s-4) var(--s-12);
+}
+
+.top {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-6);
+  font-family: var(--font-pixel);
+  font-weight: 500;
+  font-size: var(--t-body);
+}
+
+.pane {
+  --title: var(--t-h2);
+  position: relative;
+  margin-top: var(--s-12);
+  padding: calc(var(--title) + var(--s-6)) var(--s-6) var(--s-6);
+}
+
+.pane::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--title) / 2 - var(--line-w) / 2) 0 0;
+  border: var(--line-w) solid var(--line);
+  clip-path: var(--chamfer);
+  pointer-events: none;
+}
+
+.pane-hero {
+  --title: var(--t-h1);
+  margin-top: var(--s-6);
+}
+
+.pane > .title {
+  position: absolute;
+  top: 0;
+  left: var(--s-6);
+  z-index: 1;
+  max-width: calc(100% - 2 * var(--s-6));
+  margin: 0;
+  padding: 0 var(--s-2);
+  background: var(--ground);
+  font-family: var(--font-pixel);
+  font-size: var(--title);
+  line-height: 1;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pane > .version {
+  position: absolute;
+  right: var(--s-6);
+  bottom: calc(var(--line-w) / 2 - 0.5rem);
+  z-index: 1;
+  padding: 0 var(--s-2);
+  background: var(--ground);
+  font-family: var(--font-mono);
+  font-size: var(--t-body);
+  line-height: 1rem;
+  color: var(--text-soft);
+}
+
+p {
+  margin: 0 0 var(--s-4);
+  max-width: 64ch;
+  color: var(--text-soft);
+}
+
+.lead {
+  color: var(--text);
+  font-size: 1.125rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+  align-items: center;
+  margin: var(--s-6) 0 var(--s-4);
+}
+
+.button {
+  position: relative;
+  isolation: isolate;
+  display: inline-block;
+  padding: var(--s-2) var(--s-4);
+  font-family: var(--font-pixel);
+  font-size: var(--t-body);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: var(--line-w) solid var(--line);
+  clip-path: var(--chamfer);
+}
+
+.button:hover,
+.button.primary {
+  color: var(--ground);
+}
+
+.button:hover::before,
+.button.primary::before {
+  background: var(--text);
+}
+
+.button.primary:hover {
+  color: var(--text);
+}
+
+.button.primary:hover::before {
+  background: var(--ground);
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  color: var(--text-dim);
+}
+
+.shot {
+  margin: var(--s-6) 0 0;
+}
+
+.shot img {
+  width: auto;
+}
+
+.shot figcaption {
+  margin-top: var(--s-2);
+  font-size: var(--t-small);
+  color: var(--text-dim);
+}
+
+.scene {
+  width: 100%;
+  aspect-ratio: 320 / 64;
+  margin-top: var(--s-2);
+  background: var(--ground) url("/img/scene.png") center / 100% auto no-repeat;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--s-8);
+  align-items: start;
+}
+
+ul {
+  margin: 0 0 var(--s-4);
+  padding-left: 1.25em;
+  list-style: square;
+  color: var(--text-soft);
+}
+
+li {
+  margin-bottom: var(--s-2);
+}
+
+li::marker {
+  color: var(--text);
+}
+
+table {
+  width: 100%;
+  margin: 0 0 var(--s-4);
+  border-collapse: collapse;
+  color: var(--text-soft);
+}
+
+td {
+  padding: var(--s-2) var(--s-3) var(--s-2) 0;
+  vertical-align: baseline;
+  border-top: 1px solid var(--text-dim);
+}
+
+tr:last-child td {
+  border-bottom: 1px solid var(--text-dim);
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.keys {
+  margin: 0;
+}
+
+.keys > div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+
+.keys > div::after {
+  content: "";
+  order: 1;
+  flex: 1;
+  min-width: var(--s-6);
+  border-bottom: var(--line-w) dotted var(--text-dim);
+}
+
+.keys dt {
+  order: 0;
+}
+
+.keys dd {
+  order: 2;
+  margin: 0;
+  color: var(--text-soft);
+  text-align: right;
+}
+
+kbd {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+footer {
+  margin-top: var(--s-12);
+  padding-top: var(--s-4);
+  border-top: var(--line-w) solid var(--line);
+  font-size: var(--t-small);
+}
+
+footer p {
+  max-width: none;
+  color: var(--text-dim);
+}
+
+@media (max-width: 40rem) {
+  .pane {
+    --title: var(--t-body);
+    padding-inline: var(--s-4);
+  }
+
+  .pane-hero {
+    --title: var(--t-h2);
+  }
+
+  .pane > .title {
+    left: var(--s-4);
+    max-width: calc(100% - 2 * var(--s-4));
+  }
+
+  .pane > .version {
+    right: var(--s-4);
+  }
+
+  .keys > div {
+    flex-wrap: wrap;
+    row-gap: 0;
+    margin-bottom: var(--s-3);
+  }
+
+  .keys > div::after {
+    display: none;
+  }
+
+  .keys dd {
+    margin-left: auto;
+  }
+}
