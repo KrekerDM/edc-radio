@@ -46,6 +46,19 @@ desktop-app
 russian
 ```
 
+## Сайт
+
+Страница проекта лежит в `site/`: HTML, CSS, шрифты и картинки, сборка не
+нужна. Проект в Vercel настраивается так:
+
+- Root Directory — `site`;
+- Framework Preset — Other;
+- Build Command и Output Directory — пустые.
+
+`site/vercel.json` убирает `.html` из адресов и задаёт кэш для шрифтов и
+картинок. Когда сайт заработает, его адрес ставится в поле Website вместо
+ссылки на релизы.
+
 ## Настройки репозитория
 
 - Лицензия MIT, файл `LICENSE` уже в репозитории.

@@ -1,0 +1,32 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Test
+        run: dotnet test tests/EdcRadio.Tests/EdcRadio.Tests.csproj -c Release
+      - name: Publish
+        run: dotnet publish src/EdcRadio/EdcRadio.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EdcRadio
+          path: publish/EdcRadio.exe
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: gh release upload "${{ github.ref_name }}" publish/EdcRadio.exe --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -1,0 +1,56 @@
+name: Ошибка / Bug
+description: Плеер работает не так, как написано в README / The player does not work as the README says
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Версия / Version
+      description: Внизу окна справа, например v1.0.1 / Bottom right of the window, for example v1.0.1
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows
+      description: Например Windows 11 23H2, масштаб экрана 150 % / For example Windows 11 23H2, display scale 150 %
+    validations:
+      required: true
+  - type: dropdown
+    id: game
+    attributes:
+      label: Игра установлена / Game installed
+      options:
+        - да / yes
+        - нет / no
+    validations:
+      required: true
+  - type: dropdown
+    id: music
+    attributes:
+      label: Откуда музыка / Music source
+      options:
+        - саундтрек из Steam / Steam soundtrack
+        - своя папка / own folder
+        - музыки нет / no music
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Что делали / Steps
+      description: По шагам, что нажимали / Step by step, what you pressed
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Что ожидали и что случилось / Expected and actual
+    validations:
+      required: true
+  - type: textarea
+    id: crash
+    attributes:
+      label: crash.log
+      description: Если плеер упал, приложите %APPDATA%\EdcRadio\crash.log / If the player crashed, attach %APPDATA%\EdcRadio\crash.log
+      render: text

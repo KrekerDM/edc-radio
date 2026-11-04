@@ -1,0 +1,15 @@
+name: Идея / Idea
+description: Предложение для плеера / A suggestion for the player
+labels: [idea]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Что добавить или изменить / What to add or change
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Зачем / Why
+      description: В какой ситуации это пригодится / When it would help

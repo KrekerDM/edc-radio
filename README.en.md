@@ -37,7 +37,8 @@ screen. Jumping to the next station crackles for 0.35 seconds.
 
 - **Tape** plays the whole album in order. Side A is disc 1 with 22 tracks,
   side B is disc 2 with 6. The `<<` and `>>` buttons move between tracks. The
-  track number is kept until the next launch.
+  track is kept until the next launch, even when files are added to the
+  folder.
 - **Scan** moves to the next station every 6 seconds until you touch the dial.
 - **Sleep** runs 15, 30 or 60 minutes. The sound fades over the last
   10 seconds, then the player pauses.
@@ -59,17 +60,18 @@ brings the normal window back. The Ctrl+Alt keys work while a game has focus.
   instead of 320 by 208.
 - **Clicks pass through** lets the mouse go through the strip into the game,
   and the title bar shows Ctrl+Alt+O instead of buttons. That key or the tray
-  menu gives the clicks back. If another program holds the key and the tray
-  icon is off, clicks do not pass through.
+  menu gives the clicks back. If another program holds the key, the title bar
+  says "tray menu". If the tray icon is off as well, clicks do not pass
+  through.
 
 While the cursor is not over the strip, the background and the glow dim to
 80 %, and the lines themselves stay bright.
 
 Background, mini and clicks live in the "settings" window, laid out like the
-game's settings: `[X]` toggles, `< 30 % >` steps through values. It also holds always on top
-without the overlay, mini mode for the normal window, glow, the tray icon,
-language and scale. Mini mode also comes on with the M key or the `-` in the
-title bar.
+game's settings: `[X]` toggles, `< 30 % >` steps through values. It also
+holds always on top without the overlay, mini mode for the normal window,
+glow, the tray icon, language and scale. Mini mode also comes on with the
+M key or the `-` in the title bar.
 
 ![Settings](docs/screenshot-settings.png)
 
@@ -87,13 +89,16 @@ nowhere else.
 3. **The game's `StreamingAssets\CustomRadio` folder**, for station 88.1 only.
 
 Without music the window offers to pick a folder or to open the soundtrack
-page on Steam. Formats are FLAC, WAV, M4A, MP3 and WMA, up to 2000 files. If a
-track exists in two formats, FLAC plays.
+page on Steam. Formats are FLAC, WAV, M4A, MP3 and WMA, up to 2000 files in
+each folder. The window opens at once and the tracks are read in the
+background. If a track exists in two formats, FLAC plays. If your folder has
+songs with the same names as soundtrack tracks, the stations play the ones
+from the folder that holds the most of them.
 
 Cover art is taken from the tracks' folder. First a picture whose name holds
 the station frequency, such as `cover (101.7 FM).jpg`, but not `demo`. Then
 `cover`, `folder` or `front`, then the first picture in alphabetical order.
-JPG, PNG and BMP work. The cover is drawn in dots, 38 by 38 pixels.
+JPG, PNG and BMP up to 8 MB work. The cover is drawn in dots, 38 by 38 pixels.
 
 ![No music yet](docs/screenshot-empty-en.png)
 
@@ -131,8 +136,11 @@ nothing else to install.
 Settings live in `%APPDATA%\EdcRadio\settings.json`. They hold the folder,
 frequency, volume, language, scale, glow, mini mode, always on top, the overlay
 with its background, mini mode and clicks, the tray icon, the tape with its
-track number and the window position. The player writes the static sound once to
-`%TEMP%\edc-radio-static-2.wav`, a 172 KB file.
+track and the window position. The player saves them right after a change in
+the settings and on exit. You can edit the file by hand, and `//` comments or
+trailing commas do not break it. The player writes the static sound to
+`%TEMP%\edc-radio-static-2.wav`, a 172 KB file, and writes it again if the
+file is damaged.
 
 ## Keys and mouse
 
@@ -163,6 +171,21 @@ the window. A click on the tray icon shows or hides the window. Its menu has
 show window, pause, next station, tape, overlay, clicks pass through, always
 on top and quit. Starting the exe again also brings a hidden window back.
 
+## If something breaks
+
+- **A damaged or deleted track.** The status line shows "could not open" with
+  the file name, and the station plays the next track. If none of the station's
+  tracks open, the player tries again after 10 seconds.
+- **The player crashes.** It shows a message and writes a report to
+  `%APPDATA%\EdcRadio\crash.log` with the date, the version, the Windows
+  version and the error text. The settings are saved first.
+- **settings.json is damaged.** The player starts with default settings and
+  keeps the old file next to it as `settings.json.bad`.
+
+You can report a bug in [Issues](../../issues/new/choose). The "Bug" form asks
+for the version, Windows, where the music comes from and what you did. If
+there is a `crash.log`, attach it.
+
 ## Building the exe
 
 ```powershell
@@ -174,12 +197,26 @@ The result is `publish\EdcRadio.exe`, 66 MB. A 270 KB file that needs the
 
 ```powershell
 dotnet publish src\EdcRadio\EdcRadio.csproj -c Release -r win-x64 -p:SelfContained=false -p:PublishSingleFile=true -o publish
-``` `tools\make_sprites.py`
-rebuilds the sprites, `Sprites.cs` and the icon. It needs Pillow.
+```
+
+`tools\make_sprites.py` rebuilds the sprites, `Sprites.cs` and the icon. It
+needs Pillow.
 
 ```powershell
 python tools\make_sprites.py
 ```
+
+One command runs the tests.
+
+```powershell
+dotnet test tests\EdcRadio.Tests
+```
+
+The 42 tests cover FLAC and tag reading, duplicate handling, how tracks are
+picked for stations, the broadcast clock, damaged settings, reading
+`data.unity3d` from random bytes, fonts and the glow bounds. GitHub Actions
+builds the exe and runs the tests on every push, and for a `v*` tag it attaches
+`EdcRadio.exe` to the release.
 
 ## Files
 
@@ -189,7 +226,7 @@ src/EdcRadio/
   MainForm.cs    window, mini mode, overlay, settings, keys, tray
   Radio.cs       broadcast, tape, sleep, static and crackle
   Stations.cs    stations and the broadcast clock
-  Library.cs     track search, FLAC and tags, Steam
+  Library.cs     tracks from folders, FLAC and tags, Steam
   Scene.cs       the scene at the bottom and the weather
   Canvas.cs      320×208 canvas, frames and text
   Glow.cs        scaling, glow and transparency
@@ -201,9 +238,12 @@ src/EdcRadio/
   Settings.cs    settings.json
   Sprites.cs     sprite places, written by tools/make_sprites.py
   Assets/        built-in sprites and icon
+tests/EdcRadio.Tests/  xUnit tests
 tools/
   make_sprites.py  sprites, Sprites.cs and app.ico from text
+site/            the project page, HTML and CSS with no build step
 docs/            screenshots and GitHub texts
+.github/         the GitHub Actions build and the issue forms
 ```
 
 ## Canvas, glow, broadcast

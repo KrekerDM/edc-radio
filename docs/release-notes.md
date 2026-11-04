@@ -1,3 +1,73 @@
+# v1.0.1
+
+Исправления после проверки на ошибки.
+
+- **Окно открывается сразу**, треки читаются в фоне. Раньше большая папка или
+  спящий диск подвешивали окно при запуске, при выборе папки и при каждом
+  переключении на плеер без музыки.
+- **Саундтрек из Steam не теряется**, если в выбранной папке больше 2000
+  файлов: предел теперь у каждой папки свой.
+- **Свои песни не занимают места треков саундтрека.** Если названия совпали,
+  станция берёт трек из папки, где треков саундтрека больше всего.
+- **Разные песни с одинаковым номером и названием** больше не склеиваются в
+  одну, а из CustomRadio играют все файлы.
+- **Файл, который не открылся**, станция пропускает и включает следующий трек,
+  имя файла видно в строке состояния. Раньше станция молчала.
+- **Сон срабатывает вовремя**, даже если компьютер уходил в спящий режим или
+  был загружен.
+- **Кассета помнит трек по файлу**, а не по номеру в списке, и не выключается,
+  если однажды при запуске музыка не нашлась.
+- **Клики сквозь оверлей** включаются при запуске без значка в трее и после
+  переключения значка. Если Ctrl+Alt+O занято, в заголовке написано
+  «меню в трее».
+- **Окно не меняет размер** при переходе на монитор с другим масштабом
+  Windows и уменьшает свой масштаб, если не помещается на экране.
+- **Повторный запуск exe** выводит окно на передний план.
+- **При падении** плеер сохраняет настройки и пишет отчёт в
+  `%APPDATA%\EdcRadio\crash.log`.
+- **settings.json** с комментариями и лишними запятыми читается, испорченный
+  файл остаётся рядом как `settings.json.bad`, запись идёт через временный
+  файл.
+- **Сценка не замирает**, если плеер работает несколько дней подряд.
+- **Длинные теги, огромные обложки и странные таблицы шрифтов** больше не
+  тормозят и не роняют плеер.
+
+---
+
+## English
+
+Fixes after a bug hunt.
+
+- **The window opens at once** and the tracks are read in the background.
+  A big folder or a sleeping drive used to freeze the window at startup, after
+  picking a folder and every time you switched to the player without music.
+- **The Steam soundtrack is no longer lost** when the chosen folder has more
+  than 2000 files: every folder now gets its own limit.
+- **Your own songs no longer take the place of soundtrack tracks.** When names
+  match, a station takes the track from the folder that holds the most
+  soundtrack tracks.
+- **Different songs with the same number and name** are no longer merged into
+  one, and every file in CustomRadio plays.
+- **A file that does not open** is skipped, the station plays the next track
+  and the status line shows the file name. The station used to go silent.
+- **Sleep fires on time**, even after the computer slept or was busy.
+- **Tape remembers its track by file**, not by its place in the list, and no
+  longer turns off after a launch where the music was not found.
+- **Clicks pass through the overlay** at startup without the tray icon and
+  after the tray icon is toggled. If Ctrl+Alt+O is taken, the title bar says
+  "tray menu".
+- **The window keeps its size** on a monitor with a different Windows scale
+  and lowers its own scale when it does not fit the screen.
+- **Starting the exe again** brings the window to the front.
+- **On a crash** the player saves its settings and writes a report to
+  `%APPDATA%\EdcRadio\crash.log`.
+- **settings.json** with comments and trailing commas is read, a damaged file
+  is kept next to it as `settings.json.bad`, and saving goes through a
+  temporary file.
+- **The scene keeps moving** when the player runs for days.
+- **Long tags, huge covers and odd font tables** no longer slow down or crash
+  the player.
+
 # v1.0.0
 
 Первая версия.
