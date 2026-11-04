@@ -1,3 +1,30 @@
+# v1.1.0
+
+- **Статус в Discord.** Если Discord запущен, в профиле видно «Слушает EDC
+  Radio»: трек, исполнитель, станция с частотой или сторона кассеты и полоска
+  времени. Картинки статуса — значок плеера, радиовышка и кассета из своего
+  пака. На паузе, между станциями и без музыки статус пропадает.
+- **Новая строка в настройках**, «статус в Discord». Статус включён сразу, и
+  при первом показе плеер пишет об этом в строке состояния.
+- Плеер говорит с Discord через его локальный канал в отдельном потоке. Если
+  Discord не запущен, не отвечает или перезапустился, окно не ждёт, а плеер
+  пробует снова раз в 20 секунд.
+
+---
+
+## English
+
+- **Discord status.** When Discord runs, your profile shows "Listening to EDC
+  Radio" with the track, the artist, the station and frequency or the tape
+  side, and a time bar. The status images are the player icon, the radio tower
+  and the cassette from the built-in pack. The status goes away on pause,
+  between stations and without music.
+- **A new settings row**, "Discord status". It is on by default, and the
+  first time the status shows, the player says so in the status line.
+- The player talks to Discord over its local channel on a separate thread. When
+  Discord is not running, does not answer or was restarted, the window does not
+  wait, and the player tries again every 20 seconds.
+
 # v1.0.1
 
 Исправления после проверки на ошибки.

@@ -31,6 +31,8 @@ namespace EdcRadio
         public bool OverlayMini { get; set; } = true;
         public bool OverlayClickThrough { get; set; } = true;
         public bool Tray { get; set; } = true;
+        public bool Discord { get; set; } = true;
+        public bool DiscordShown { get; set; }
         public bool Tape { get; set; }
         public int TapeTrack { get; set; }
         public string TapePath { get; set; } = "";

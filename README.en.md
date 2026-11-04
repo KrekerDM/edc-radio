@@ -71,10 +71,31 @@ While the cursor is not over the strip, the background and the glow dim to
 Background, mini and clicks live in the "settings" window, laid out like the
 game's settings: `[X]` toggles, `< 30 % >` steps through values. It also
 holds always on top without the overlay, mini mode for the normal window,
-glow, the tray icon, language and scale. Mini mode also comes on with the
-M key or the `-` in the title bar.
+glow, the tray icon, the Discord status, language and scale. Mini mode also
+comes on with the M key or the `-` in the title bar.
 
 ![Settings](docs/screenshot-settings-en.png)
+
+## Discord status
+
+When Discord runs on the same computer, your profile shows "Listening to EDC
+Radio" with the track title, the artist, the station and frequency or the tape
+side, and a bar with the time left in the track. The status images are the
+player icon, the radio tower and the cassette from the built-in pack, and
+Discord loads them from the project site. The button under the status opens
+the site. Other people see it, you do not.
+
+The status is on by default, and the first time it shows, the player says so
+in the status line. Turn it off in the "settings" window with the "Discord
+status" row. The status goes away on pause, between stations and without
+music.
+
+The player hands this data only to the Discord app on this computer, over its
+local channel. Discord then sends it to its servers and shows it to your
+friends and to people on servers you share. For your own files the status
+shows the title from the tags, or the file name when there are no tags. When
+Discord is not running or was restarted, the player tries to connect every
+20 seconds and does nothing else.
 
 ## Steam soundtrack or your folder
 
@@ -136,7 +157,8 @@ nothing else to install.
 
 Settings live in `%APPDATA%\EdcRadio\settings.json`. They hold the folder,
 frequency, volume, language, scale, glow, mini mode, always on top, the overlay
-with its background, mini mode and clicks, the tray icon, the tape with its
+with its background, mini mode and clicks, the tray icon, the Discord status,
+the tape with its
 track and the window position. The player saves them right after a change in
 the settings and on exit. You can edit the file by hand, and `//` comments or
 trailing commas do not break it. The player writes the static sound to
@@ -213,9 +235,10 @@ One command runs the tests.
 dotnet test tests\EdcRadio.Tests
 ```
 
-The 42 tests cover FLAC and tag reading, duplicate handling, how tracks are
+The 50 tests cover FLAC and tag reading, duplicate handling, how tracks are
 picked for stations, the broadcast clock, damaged settings, reading
-`data.unity3d` from random bytes, fonts and the glow bounds. GitHub Actions
+`data.unity3d` from random bytes, fonts, the glow bounds and a talk with Discord
+over a fake channel. GitHub Actions
 builds the exe and runs the tests on every push, and for a `v*` tag it attaches
 `EdcRadio.exe` to the release.
 
@@ -237,6 +260,7 @@ src/EdcRadio/
   BitmapFont.cs  pixel fonts
   Text.cs        Russian and English strings
   Settings.cs    settings.json
+  Discord.cs     the Discord status over the local channel
   Sprites.cs     sprite places, written by tools/make_sprites.py
   Assets/        built-in sprites and icon
 tests/EdcRadio.Tests/  xUnit tests

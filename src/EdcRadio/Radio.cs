@@ -33,6 +33,7 @@ namespace EdcRadio
         public bool Paused { get; private set; }
         public bool Tape { get; private set; }
         public Track Now { get; private set; }
+        public bool Ready { get; private set; }
         public Track Broken { get; private set; }
         public int Errors { get; private set; }
         public int AlbumCount => _album.Count;
@@ -234,6 +235,7 @@ namespace EdcRadio
                 player.Position = seek;
             }
             _seek = null;
+            Ready = true;
         }
 
         private void LeaveTape()
@@ -303,6 +305,7 @@ namespace EdcRadio
         private void Play(Track track, TimeSpan offset)
         {
             Now = track;
+            Ready = false;
             _seek = offset > TimeSpan.FromSeconds(1) ? offset : (TimeSpan?)null;
             MediaPlayer old = _music;
             _music = NewPlayer();

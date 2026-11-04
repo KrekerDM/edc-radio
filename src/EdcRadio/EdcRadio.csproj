@@ -13,7 +13,7 @@
     <AssemblyName>EdcRadio</AssemblyName>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <Product>EDC Radio</Product>
     <Description>Radio for the Easy Delivery Co. soundtrack</Description>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>

@@ -23,6 +23,7 @@ namespace EdcRadio
         private const int HotkeyMessage = 0x0312;
         private const int DisplayChangeMessage = 0x007E;
         private const long CoverBytes = 8 << 20;
+        private const string Home = "https://edc-radio-site.vercel.app/";
         private static readonly Rectangle DialArea = new Rectangle(12, 60, 296, 24);
         private static readonly int[] SleepSteps = { 0, 15, 30, 60 };
         private static readonly string[] Pictures = { ".jpg", ".jpeg", ".png", ".bmp" };
@@ -97,6 +98,7 @@ namespace EdcRadio
         private readonly ContextMenuStrip _menu = new ContextMenuStrip();
         private readonly NotifyIcon _tray = new NotifyIcon();
         private readonly System.Threading.SynchronizationContext _ui;
+        private readonly Discord _discord = new Discord(Discord.ApplicationId);
         private Bitmap _plain;
         private Radio _radio;
         private List<Track> _custom = new List<Track>();
@@ -106,6 +108,8 @@ namespace EdcRadio
         private double _loadedAt;
         private int _errors;
         private int _layerFailures;
+        private string _presence = "";
+        private long _presenceStart;
         private int _scale;
         private Point _mouse = new Point(-100, -100);
         private string _pressed;
@@ -293,6 +297,7 @@ namespace EdcRadio
                     _noticeLeft = 4f;
                 }
             }
+            Publish();
             if (_scan)
             {
                 if (_radio.Tape || Empty)
@@ -334,6 +339,52 @@ namespace EdcRadio
             if (!Visible || WindowState == FormWindowState.Minimized) return;
             Render();
             Present();
+        }
+
+        private void Publish()
+        {
+            Track t = _radio.Now;
+            Station s = _radio.Tuned;
+            bool on = _settings.Discord && t != null && _radio.Heard > 0f && !_radio.Paused && (_radio.Tape || s != null);
+            if (on && !_radio.Ready) return;
+            long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            long start = on ? now - (long)_radio.Position.TotalMilliseconds : 0;
+            string where = !on ? ""
+                : _radio.Tape ? T("tape") + ", " + Place(t)
+                : Freq(s.Frequency) + " FM " + T(s.Id);
+            string key = on ? where + "|" + t.Path : "";
+            if (key == _presence && Math.Abs(start - _presenceStart) < 3000) return;
+            _presence = key;
+            _presenceStart = start;
+            if (!on)
+            {
+                _discord.Show(null);
+                return;
+            }
+            if (!_settings.DiscordShown)
+            {
+                _settings.DiscordShown = true;
+                Notice(T("discord on"));
+                _noticeLeft = 5f;
+                SaveState();
+            }
+            long length = (long)_radio.Length.TotalMilliseconds;
+            string page = EdcRadio.Text.Russian ? Home : Home + "en/";
+            string artist = (t.Artist ?? "").Trim(' ', ',');
+            _discord.Show(new Presence
+            {
+                Details = t.Title,
+                State = artist == "" ? where : Discord.Fit(artist, Math.Max(8, 125 - where.Length)) + " · " + where,
+                Start = start,
+                End = length > 0 ? start + length : 0,
+                LargeImage = Home + "img/rpc/radio.png",
+                LargeText = "EDC Radio " + Program.Version,
+                LargeUrl = page,
+                SmallImage = Home + (_radio.Tape ? "img/rpc/tape.png" : "img/rpc/tower.png"),
+                SmallText = where,
+                Button = T("discord button"),
+                ButtonUrl = page,
+            });
         }
 
         private void Present()
@@ -768,10 +819,10 @@ namespace EdcRadio
         private void Options()
         {
             Canvas c = _canvas;
-            c.Panel(24, 16, 33, 20, top: true);
-            c.Text(T("settings"), 40, 13);
-            Button("options x", "x", 24 + 32 * 8, 16, () => _sheet = Sheet.None, mono: true, marker: false);
-            int y = 30;
+            c.Panel(24, 10, 33, 21, top: true);
+            c.Text(T("settings"), 40, 7);
+            Button("options x", "x", 24 + 32 * 8, 10, () => _sheet = Sheet.None, mono: true, marker: false);
+            int y = 24;
             Toggle("options overlay", T("set overlay"), _settings.Overlay, y, ToggleOverlay);
             Choice("options background", T("set background"), _settings.OverlayBackground + " %", y += 14, NextBackground);
             Toggle("options overlay mini", T("set overlay mini"), _settings.OverlayMini, y += 14, () =>
@@ -790,6 +841,7 @@ namespace EdcRadio
             });
             Toggle("options glow", T("set glow"), _settings.Glow, y += 14, ToggleGlow);
             Toggle("options tray", T("set tray"), _settings.Tray, y += 14, ToggleTray);
+            Toggle("options discord", T("set discord"), _settings.Discord, y += 14, ToggleDiscord);
             Choice("options language", T("set language"), T("language name"), y += 14, ToggleLanguage);
             Choice("options scale", T("set scale"), "x" + _scale, y += 14, CycleScale);
         }
@@ -870,7 +922,7 @@ namespace EdcRadio
             string s;
             if (_radio.Paused) s = T("paused");
             else if (_scan) s = T("scanning");
-            else if (_radio.Tape) s = _radio.Now == null ? "" : string.Format(T("side"), Side(_radio.Now), _radio.Now.Number);
+            else if (_radio.Tape) s = _radio.Now == null ? "" : Place(_radio.Now);
             else if (_radio.Heard > 0f) s = T("on air");
             else s = T("static");
             if (_radio.SleepLeft > 0f) s += " · " + string.Format(T("sleep in"), (int)Math.Ceiling(_radio.SleepLeft / 60f));
@@ -927,6 +979,9 @@ namespace EdcRadio
                    ?? files.FirstOrDefault(f => Name(f) == "cover" || Name(f) == "folder" || Name(f) == "front")
                    ?? files[0];
         }
+
+        private static string Place(Track t) =>
+            t.Number > 0 ? string.Format(T("side"), Side(t), t.Number) : string.Format(T("side only"), Side(t));
 
         private static string Side(Track t) => t.Disc == 1 ? "A" : t.Disc == 2 ? "B" : t.Disc.ToString(CultureInfo.InvariantCulture);
 
@@ -1059,6 +1114,12 @@ namespace EdcRadio
         {
             _settings.TopMost = !_settings.TopMost;
             ApplyWindow();
+        }
+
+        private void ToggleDiscord()
+        {
+            _settings.Discord = !_settings.Discord;
+            SaveState();
         }
 
         private void ToggleTray()
@@ -1611,6 +1672,7 @@ namespace EdcRadio
                 _tray.Dispose();
                 _menu.Dispose();
                 _radio?.Dispose();
+                _discord.Dispose();
                 _canvas.Dispose();
                 _layer.Dispose();
                 _plain?.Dispose();
