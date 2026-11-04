@@ -15,13 +15,14 @@ namespace EdcRadio
 {
     internal sealed class MainForm : Form
     {
-        public const string Version = "v1.0";
         private const int FullRows = 208;
         private const int MiniRows = 64;
         private const int LayeredStyle = 0x80000;
         private const int PassStyle = 0x20;
         private const int TopStyle = 0x8;
         private const int HotkeyMessage = 0x0312;
+        private const int DisplayChangeMessage = 0x007E;
+        private const long CoverBytes = 8 << 20;
         private static readonly Rectangle DialArea = new Rectangle(12, 60, 296, 24);
         private static readonly int[] SleepSteps = { 0, 15, 30, 60 };
         private static readonly string[] Pictures = { ".jpg", ".jpeg", ".png", ".bmp" };
@@ -95,8 +96,16 @@ namespace EdcRadio
         private readonly Layer _layer = new Layer();
         private readonly ContextMenuStrip _menu = new ContextMenuStrip();
         private readonly NotifyIcon _tray = new NotifyIcon();
+        private readonly System.Threading.SynchronizationContext _ui;
         private Bitmap _plain;
         private Radio _radio;
+        private List<Track> _custom = new List<Track>();
+        private int _loadId;
+        private bool _loading;
+        private bool _loaded;
+        private double _loadedAt;
+        private int _errors;
+        private int _layerFailures;
         private int _scale;
         private Point _mouse = new Point(-100, -100);
         private string _pressed;
@@ -109,13 +118,12 @@ namespace EdcRadio
         private float _fade = 1f;
         private double _last;
         private double _now;
-        private float _ticker;
+        private double _ticker;
         private float _noticeLeft;
         private string _notice = "";
         private string _station;
         private int _sleepStep;
         private int _wheel;
-        private double _scanned;
         private string _title = "";
         private bool _overlayKey;
         private bool _showKey;
@@ -141,9 +149,9 @@ namespace EdcRadio
             catch (ArgumentException)
             {
             }
-            Reload(Scan());
-            _radio.PlaceTape(settings.TapeTrack);
-            if (settings.Tape && _radio.AlbumCount > 0) _radio.StartTape(settings.TapeTrack);
+            _ui = System.Threading.SynchronizationContext.Current ?? new WindowsFormsSynchronizationContext();
+            _radio = new Radio(new List<Track>(), new List<Track>(), settings.Frequency, settings.Volume);
+            LoadLibrary(false);
             Rectangle work = TargetScreen().WorkingArea;
             _scale = PickScale(settings.Scale, work);
             ClientSize = new Size(Canvas.W * _scale, Rows * _scale);
@@ -172,7 +180,7 @@ namespace EdcRadio
 
         private int Rows => Mini ? MiniRows : FullRows;
 
-        private bool PassClicks => _settings.Overlay && _settings.OverlayClickThrough && (_overlayKey || _settings.Tray);
+        private bool PassClicks => _layered && _settings.Overlay && _settings.OverlayClickThrough && (_overlayKey || _settings.Tray);
 
         private float Background
         {
@@ -192,37 +200,81 @@ namespace EdcRadio
             {
                 CreateParams cp = base.CreateParams;
                 if (_layered) cp.ExStyle |= LayeredStyle;
-                if (_layered && _settings != null && PassClicks) cp.ExStyle |= PassStyle;
+                if (_settings != null && PassClicks) cp.ExStyle |= PassStyle;
                 if (_topmost) cp.ExStyle |= TopStyle;
                 return cp;
             }
         }
 
-        private (List<Track> Album, List<Track> Custom) Scan()
+        private void LoadLibrary(bool quiet)
         {
-            List<Track> album = Library.Load(Library.Sources(_settings.Folder));
-            string customFolder = Library.GameCustomRadio();
-            List<Track> custom = customFolder != null ? Library.Load(new[] { customFolder }) : new List<Track>();
+            int id = ++_loadId;
+            _loading = true;
+            string folder = _settings.Folder;
+            List<Track> custom = quiet ? _custom : null;
+            System.Threading.SynchronizationContext ui = _ui;
+            var worker = new System.Threading.Thread(() =>
+            {
+                var found = ReadLibrary(folder, custom);
+                try
+                {
+                    ui.Post(_ => Loaded(id, quiet, found), null);
+                }
+                catch (Exception e) when (e is InvalidOperationException || e is ObjectDisposedException)
+                {
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "library",
+            };
+            worker.SetApartmentState(System.Threading.ApartmentState.STA);
+            worker.Start();
+        }
+
+        private static (List<Track> Album, List<Track> Custom) ReadLibrary(string folder, List<Track> custom)
+        {
+            List<Track> album = Library.Load(Library.Sources(folder));
+            if (custom == null)
+            {
+                string customFolder = Library.GameCustomRadio();
+                custom = customFolder != null ? Library.Load(new[] { customFolder }, false) : new List<Track>();
+            }
             return (album, custom);
+        }
+
+        private void Loaded(int id, bool quiet, (List<Track> Album, List<Track> Custom) found)
+        {
+            if (IsDisposed || id != _loadId) return;
+            _loading = false;
+            _loadedAt = _watch.Elapsed.TotalSeconds;
+            if (quiet && found.Album.Count == 0) return;
+            Reload(found);
         }
 
         private void Reload((List<Track> Album, List<Track> Custom) found)
         {
-            float frequency = _radio?.Frequency ?? _settings.Frequency;
-            float volume = _radio?.Volume ?? _settings.Volume;
-            bool paused = _radio?.Paused ?? false;
-            float sleep = _radio?.SleepLeft ?? -1f;
-            bool tape = _radio?.Tape ?? false;
-            int index = _radio?.TapeIndex ?? 0;
-            _radio?.Dispose();
+            bool first = !_loaded;
+            float frequency = _radio.Frequency;
+            float volume = _radio.Volume;
+            bool paused = _radio.Paused;
+            float sleep = _radio.SleepLeft;
+            bool tape = first ? _settings.Tape : _radio.Tape;
+            string path = first ? _settings.TapePath : _radio.TapeTrack?.Path;
+            int index = first ? _settings.TapeTrack : _radio.TapeIndex;
+            _radio.Dispose();
             _radio = new Radio(found.Album, found.Custom, frequency, volume, paused);
+            _custom = found.Custom;
+            _loaded = true;
+            _errors = 0;
             if (sleep > 0f) _radio.Sleep(sleep / 60f);
+            int at = found.Album.FindIndex(t => string.Equals(t.Path, path, StringComparison.OrdinalIgnoreCase));
+            if (at >= 0) index = at;
             _radio.PlaceTape(index);
             if (tape && _radio.AlbumCount > 0) _radio.StartTape(index);
             foreach (Bitmap b in _covers.Values) b?.Dispose();
             _covers.Clear();
             _scan = false;
-            _scanned = _watch.Elapsed.TotalSeconds;
         }
 
         private void Frame()
@@ -232,6 +284,15 @@ namespace EdcRadio
             _last = _now;
             _radio.Tick(dt);
             if (_radio.SleepLeft < 0f) _sleepStep = 0;
+            if (_radio.Errors != _errors)
+            {
+                _errors = _radio.Errors;
+                if (_radio.Broken != null)
+                {
+                    Notice(string.Format(T("cannot play"), Path.GetFileName(_radio.Broken.Path)));
+                    _noticeLeft = 4f;
+                }
+            }
             if (_scan)
             {
                 if (_radio.Tape || Empty)
@@ -286,8 +347,13 @@ namespace EdcRadio
                 {
                     float dim = _settings.Overlay ? Math.Max(0f, Math.Min(1f, _fade)) : 1f;
                     _glow.Compose(_canvas.Bitmap, _scale, rows, _settings.Glow, Background, dim, _layer.Bits, _layer.Stride);
-                    if (_layer.Push(Handle, 255)) return;
+                    if (_layer.Push(Handle, 255))
+                    {
+                        _layerFailures = 0;
+                        return;
+                    }
                 }
+                if (++_layerFailures < 25) return;
                 _layered = false;
                 UpdateStyles();
             }
@@ -336,7 +402,7 @@ namespace EdcRadio
             x += Button("folder", T("folder"), x, 189, PickFolder) + 16;
             x += Button("options", T("settings"), x, 189, () => Open(Sheet.Options)) + 16;
             Button("help", "[?]", x, 192, () => Open(Sheet.Help), mono: true);
-            c.Text(Version, 296, 189, Align.Right);
+            c.Text(Program.Version, 296, 189, Align.Right);
         }
 
         private void RenderMini()
@@ -348,7 +414,7 @@ namespace EdcRadio
             Frequency();
             if (!Empty) _hits.Add(new Hit { Id = "mini freq", Bounds = new Rectangle(12, 8, 112, 26), Click = Next });
             bool tape = _radio.Tape;
-            c.Text(c.Fit(Empty ? T("no music status") : StationName(), 280 - 128), 128, 10);
+            c.Text(c.Fit(!Empty ? StationName() : _loaded ? T("no music status") : T("loading"), 280 - 128), 128, 10);
             if (!Empty) c.Text(c.Fit(Status(), 280 - 128), 128, 23);
             MiniTower(288, 14);
             Track t = _radio.Now;
@@ -362,8 +428,11 @@ namespace EdcRadio
             }
             else if (Empty)
             {
-                int w1 = Button("pick", T("pick folder"), 24, 34, PickFolder);
-                Button("steam", T("steam"), 24 + w1 + 24, 34, OpenSteam);
+                if (_loaded)
+                {
+                    int w1 = Button("pick", T("pick folder"), 24, 34, PickFolder);
+                    Button("steam", T("steam"), 24 + w1 + 24, 34, OpenSteam);
+                }
             }
             else
             {
@@ -383,12 +452,15 @@ namespace EdcRadio
         private void TitleButtons(string mini)
         {
             Canvas c = _canvas;
-            c.Fill(266, 0, 46, 8, white: false);
             if (PassClicks)
             {
-                c.Text("Ctrl+Alt+O", 310, -3, Align.Right);
+                string hint = _overlayKey ? "Ctrl+Alt+O" : T("tray hint");
+                int w = c.Measure(hint);
+                c.Fill(306 - w, 0, w + 6, 8, white: false);
+                c.Text(hint, 310, -3, Align.Right);
                 return;
             }
+            c.Fill(266, 0, 46, 8, white: false);
             Button("mini", mini, 272, 0, ToggleMini, mono: true, marker: false);
             Button("min", "_", 288, 0, () => WindowState = FormWindowState.Minimized, mono: true, marker: false);
             Button("close", "x", 304, 0, Close, mono: true, marker: false);
@@ -634,6 +706,11 @@ namespace EdcRadio
         private void EmptyState()
         {
             Canvas c = _canvas;
+            if (!_loaded)
+            {
+                if (_now > 0.6) c.Text(T("loading"), 160, 80, Align.Center);
+                return;
+            }
             c.Text(T("no music"), 160, 62, Align.Center);
             c.Text(T("no music 1"), 160, 80, Align.Center);
             c.Text(T("no music 2"), 160, 93, Align.Center);
@@ -814,9 +891,14 @@ namespace EdcRadio
             {
                 try
                 {
-                    using (FileStream stream = File.OpenRead(file))
-                    using (Image image = Image.FromStream(stream))
-                        result = Canvas.Dither(image, 38, 38);
+                    if (new FileInfo(file).Length <= CoverBytes)
+                    {
+                        using (FileStream stream = File.OpenRead(file))
+                        using (Image image = Image.FromStream(stream, false, false))
+                        {
+                            if ((long)image.Width * image.Height <= 16_000_000) result = Canvas.Dither(image, 38, 38);
+                        }
+                    }
                 }
                 catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is ArgumentException || e is OutOfMemoryException || e is ExternalException)
                 {
@@ -940,12 +1022,14 @@ namespace EdcRadio
         {
             _settings.Glow = !_settings.Glow;
             Notice(_settings.Glow ? T("glow on") : T("glow off"));
+            SaveState();
         }
 
         private void ToggleLanguage()
         {
             EdcRadio.Text.Russian = !EdcRadio.Text.Russian;
             _settings.Language = EdcRadio.Text.Russian ? "ru" : "en";
+            SaveState();
         }
 
         private void ToggleOverlay()
@@ -981,16 +1065,23 @@ namespace EdcRadio
         {
             _settings.Tray = !_settings.Tray;
             _tray.Visible = _settings.Tray;
+            ApplyWindow();
         }
 
         private void NextBackground()
         {
             int i = Array.IndexOf(Settings.Backgrounds, _settings.OverlayBackground);
             _settings.OverlayBackground = Settings.Backgrounds[(i + 1) % Settings.Backgrounds.Length];
+            SaveState();
         }
 
         private void ApplyWindow()
         {
+            if (!_layered)
+            {
+                _layered = true;
+                _layerFailures = 0;
+            }
             bool top = _settings.Overlay || _settings.TopMost;
             if (top != _topmost)
             {
@@ -998,14 +1089,26 @@ namespace EdcRadio
                 if (IsHandleCreated) SetWindowPos(Handle, top ? (IntPtr)(-1) : (IntPtr)(-2), 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010);
             }
             if (IsHandleCreated) UpdateStyles();
+            SaveState();
             if (WindowState != FormWindowState.Normal) return;
             ClientSize = new Size(Canvas.W * _scale, Rows * _scale);
             KeepOnScreen();
         }
 
+        private void FitScale()
+        {
+            if (WindowState != FormWindowState.Normal) return;
+            int max = Limit(System.Windows.Forms.Screen.FromRectangle(Bounds).WorkingArea);
+            if (_scale <= max) return;
+            _scale = max;
+            ClientSize = new Size(Canvas.W * _scale, Rows * _scale);
+            Cursor = Cursors(0);
+        }
+
         private void KeepOnScreen()
         {
             if (WindowState != FormWindowState.Normal) return;
+            FitScale();
             Rectangle work = System.Windows.Forms.Screen.FromRectangle(Bounds).WorkingArea;
             int x = Math.Max(work.Left, Math.Min(Left, work.Right - Width));
             int y = Math.Max(work.Top, Math.Min(Top, work.Bottom - Height));
@@ -1021,6 +1124,8 @@ namespace EdcRadio
             }
             Wake();
         }
+
+        public void HideTray() => _tray.Visible = false;
 
         public void Wake()
         {
@@ -1075,6 +1180,7 @@ namespace EdcRadio
             Location = new Point(center.X - Width / 2, center.Y - Height / 2);
             KeepOnScreen();
             Cursor = Cursors(0);
+            SaveState();
         }
 
         private Point PickLocation(Rectangle work)
@@ -1106,7 +1212,7 @@ namespace EdcRadio
                 if (dialog.ShowDialog(this) != DialogResult.OK) return;
                 _settings.Folder = dialog.SelectedPath;
                 _settings.Save();
-                Reload(Scan());
+                LoadLibrary(false);
             }
         }
 
@@ -1193,7 +1299,7 @@ namespace EdcRadio
                 Notice(string.Format(T("hotkeys busy"), string.Join(", ", busy)));
                 _noticeLeft = 6f;
             }
-            if (_settings.Overlay && _settings.OverlayClickThrough && !PassClicks) UpdateStyles();
+            UpdateStyles();
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
@@ -1236,6 +1342,7 @@ namespace EdcRadio
                 return;
             }
             base.WndProc(ref m);
+            if (m.Msg == DisplayChangeMessage && IsHandleCreated) BeginInvoke(new Action(KeepOnScreen));
         }
 
         protected override void OnShown(EventArgs e)
@@ -1251,13 +1358,23 @@ namespace EdcRadio
             if (WindowState == FormWindowState.Normal && IsHandleCreated) KeepOnScreen();
         }
 
+        protected override void OnResizeEnd(EventArgs e)
+        {
+            base.OnResizeEnd(e);
+            FitScale();
+        }
+
+        protected override void OnDpiChanged(DpiChangedEventArgs e)
+        {
+            e.Cancel = true;
+            base.OnDpiChanged(e);
+        }
+
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
-            if (!Empty || _watch.Elapsed.TotalSeconds - _scanned <= 3.0) return;
-            var found = Scan();
-            _scanned = _watch.Elapsed.TotalSeconds;
-            if (found.Album.Count > 0) Reload(found);
+            if (!_loaded || !Empty || _loading || _watch.Elapsed.TotalSeconds - _loadedAt < 30.0) return;
+            LoadLibrary(true);
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -1462,17 +1579,26 @@ namespace EdcRadio
             g.DrawImage(_plain, new Rectangle(0, 0, w, h), 0, 0, w, h, GraphicsUnit.Pixel);
         }
 
-        protected override void OnFormClosing(FormClosingEventArgs e)
+        protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            base.OnFormClosing(e);
             _timer.Stop();
+            SaveState();
+            base.OnFormClosed(e);
+        }
+
+        public void SaveState()
+        {
             Point place = WindowState == FormWindowState.Normal ? Location : RestoreBounds.Location;
             _settings.X = place.X;
             _settings.Y = place.Y;
             _settings.Frequency = _radio.Frequency;
             _settings.Volume = _radio.Volume;
-            _settings.Tape = _radio.Tape;
-            _settings.TapeTrack = _radio.TapeIndex;
+            if (_loaded && _radio.AlbumCount > 0)
+            {
+                _settings.Tape = _radio.Tape;
+                _settings.TapeTrack = _radio.TapeIndex;
+                _settings.TapePath = _radio.TapeTrack?.Path ?? "";
+            }
             _settings.Save();
         }
 

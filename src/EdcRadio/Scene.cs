@@ -51,7 +51,7 @@ namespace EdcRadio
         private readonly List<Mote> _smoke = new List<Mote>();
         private readonly List<Prop> _props = new List<Prop>();
         private readonly Point[] _stars;
-        private float _time;
+        private double _time;
         private float _truck = X + 40;
         private float _speed;
         private float _towerNote;
@@ -61,7 +61,7 @@ namespace EdcRadio
         private float _puff;
         private float _quiet = 10f;
         private float _jump = -1f;
-        private float _beat;
+        private double _beat;
         private float _snow = 1f;
         private float _snowTarget = 1f;
         private float _weatherLeft = 60f;
@@ -131,7 +131,7 @@ namespace EdcRadio
             foreach (Flake f in _flakes)
             {
                 f.Y += f.Fall * (0.7f + 0.3f * _snow) * dt;
-                f.X += (float)Math.Sin(_time * 0.9f + f.Phase) * (f.Near ? 5f : 3f) * dt - wind * dt;
+                f.X += (float)Math.Sin(_time * 0.9 + f.Phase) * (f.Near ? 5f : 3f) * dt - wind * dt;
                 if (f.Y >= Y + H) Reset(f, Y - 2);
                 if (f.X < X - 3) f.X += W + 6;
             }
@@ -290,7 +290,7 @@ namespace EdcRadio
             {
                 int x = TowerX, y = Ground - 14;
                 s.Sprite(s.Art.Ui, Art.Tower, x, y);
-                int phase = broadcast > 0f ? (int)(_time * 2.6f) % 3 : 0;
+                int phase = broadcast > 0f ? (int)(_time * 2.6) % 3 : 0;
                 if (phase < 2)
                 {
                     s.Fill(x + 3, y + 1, 1, 4, white: false);
@@ -306,7 +306,7 @@ namespace EdcRadio
             {
                 int x = TowerX + 2, y = Ground - 26;
                 s.Sprite(Sprites.Pack, Sprites.Tower, x, y);
-                if (broadcast > 0f && (int)(_time * 2f) % 2 == 0) s.Sprite(Sprites.Pack, Sprites.Blink, x + 4, y - 2);
+                if (broadcast > 0f && (int)(_time * 2) % 2 == 0) s.Sprite(Sprites.Pack, Sprites.Blink, x + 4, y - 2);
             }
         }
 

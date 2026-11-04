@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -27,21 +28,22 @@ namespace EdcRadio
         public const int SoundtrackAppId = 3994280;
         public const string StoreUrl = "https://store.steampowered.com/app/3994280";
         public const int Limit = 2000;
+        private const int Longest = 200;
 
         private static readonly string[] Extensions = { ".flac", ".wav", ".m4a", ".mp3", ".wma" };
 
-        public static List<Track> Load(IEnumerable<string> folders)
+        public static List<Track> Load(IEnumerable<string> folders, bool distinct = true)
         {
             var tracks = new List<Track>();
             foreach (string folder in folders.Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase))
             {
-                IEnumerable<string> files;
+                List<string> files;
                 try
                 {
                     var options = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true, AttributesToSkip = FileAttributes.System };
                     files = Directory.EnumerateFiles(folder, "*", options)
                         .Where(f => Extensions.Contains(System.IO.Path.GetExtension(f).ToLowerInvariant()))
-                        .Take(Limit - tracks.Count)
+                        .Take(Limit)
                         .ToList();
                 }
                 catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
@@ -49,25 +51,49 @@ namespace EdcRadio
                     continue;
                 }
                 Shell shell = null;
-                foreach (string file in files)
+                try
                 {
-                    try
+                    foreach (string file in files)
                     {
-                        Track t = Read(file);
-                        if (t.Length <= TimeSpan.Zero) (shell ??= new Shell()).Fill(t);
-                        tracks.Add(t);
-                    }
-                    catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is ArgumentException)
-                    {
+                        try
+                        {
+                            Track t = Read(file);
+                            if (t.Length <= TimeSpan.Zero) (shell ??= new Shell()).Fill(t);
+                            t.Title = Clip(t.Title);
+                            t.Artist = Clip(t.Artist);
+                            tracks.Add(t);
+                        }
+                        catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is ArgumentException)
+                        {
+                        }
                     }
                 }
+                finally
+                {
+                    shell?.Dispose();
+                }
             }
-            return tracks
-                .GroupBy(t => (t.Disc, t.Number, t.Key))
-                .Select(g => g.OrderBy(t => Array.IndexOf(Extensions, System.IO.Path.GetExtension(t.Path).ToLowerInvariant())).First())
+            return (distinct ? Distinct(tracks) : tracks)
                 .OrderBy(t => t.Disc).ThenBy(t => t.Number).ThenBy(t => t.Title, StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
+
+        private static IEnumerable<Track> Distinct(List<Track> tracks) =>
+            tracks.GroupBy(t => (t.Disc, t.Number, t.Key != "" ? t.Key : System.IO.Path.ChangeExtension(t.Path, null).ToLowerInvariant()))
+                .SelectMany(group =>
+                {
+                    var kept = new List<Track>();
+                    foreach (Track t in group.OrderBy(t => t.Length > TimeSpan.Zero ? 0 : 1).ThenBy(t => Rank(t.Path)))
+                        if (!kept.Any(k => Same(k, t))) kept.Add(t);
+                    return kept;
+                });
+
+        private static int Rank(string path) => Array.IndexOf(Extensions, System.IO.Path.GetExtension(path).ToLowerInvariant());
+
+        private static bool Same(Track a, Track b) =>
+            a.Length <= TimeSpan.Zero || b.Length <= TimeSpan.Zero || Math.Abs((a.Length - b.Length).TotalSeconds) <= 2.0;
+
+        private static string Clip(string s) => s != null && s.Length > Longest ? s.Substring(0, Longest) : s;
 
         public static List<string> Sources(string chosen)
         {
@@ -240,26 +266,34 @@ namespace EdcRadio
             }
         }
 
-        private sealed class Shell
+        private sealed class Shell : IDisposable
         {
             private readonly dynamic _app;
             private readonly Dictionary<string, dynamic> _folders = new Dictionary<string, dynamic>(StringComparer.OrdinalIgnoreCase);
 
             public Shell()
             {
-                Type type = Type.GetTypeFromProgID("Shell.Application");
-                if (type != null) _app = Activator.CreateInstance(type);
+                try
+                {
+                    Type type = Type.GetTypeFromProgID("Shell.Application");
+                    if (type != null) _app = Activator.CreateInstance(type);
+                }
+                catch (Exception e) when (Broken(e))
+                {
+                    _app = null;
+                }
             }
 
             public void Fill(Track track)
             {
                 if (_app == null) return;
+                dynamic item = null;
                 try
                 {
                     string dir = System.IO.Path.GetDirectoryName(track.Path);
                     if (!_folders.TryGetValue(dir, out dynamic folder)) _folders[dir] = folder = _app.NameSpace(dir);
                     if (folder == null) return;
-                    dynamic item = folder.ParseName(System.IO.Path.GetFileName(track.Path));
+                    item = folder.ParseName(System.IO.Path.GetFileName(track.Path));
                     if (item == null) return;
                     object duration = item.ExtendedProperty("System.Media.Duration");
                     if (duration != null) track.Length = TimeSpan.FromTicks(Convert.ToInt64(duration));
@@ -271,21 +305,28 @@ namespace EdcRadio
                     if (number != null && Convert.ToInt32(number) > 0) track.Number = Convert.ToInt32(number);
                     if (item.ExtendedProperty("System.Music.PartOfSet") is string set && int.TryParse(set.Split('/')[0], out int disc)) track.Disc = disc;
                 }
-                catch (COMException)
+                catch (Exception e) when (Broken(e))
                 {
                 }
-                catch (InvalidCastException)
+                finally
                 {
+                    if (item is object com) Marshal.ReleaseComObject(com);
                 }
-                catch (FormatException)
-                {
-                }
-                catch (OverflowException)
-                {
-                }
-                catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
-                {
-                }
+            }
+
+            private static bool Broken(Exception e) =>
+                e is ExternalException || e is InvalidComObjectException || e is InvalidCastException || e is FormatException
+                || e is OverflowException || e is ArgumentException || e is NotSupportedException || e is NotImplementedException
+                || e is NullReferenceException || e is UnauthorizedAccessException || e is IOException || e is InvalidOperationException
+                || e is OutOfMemoryException || e is TargetInvocationException || e is MemberAccessException
+                || e is Microsoft.CSharp.RuntimeBinder.RuntimeBinderException;
+
+            public void Dispose()
+            {
+                foreach (object folder in _folders.Values)
+                    if (folder != null) Marshal.FinalReleaseComObject(folder);
+                _folders.Clear();
+                if (_app is object app) Marshal.FinalReleaseComObject(app);
             }
         }
     }

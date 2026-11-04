@@ -90,10 +90,10 @@ namespace EdcRadio
 
         public string Fit(string text, int width)
         {
-            if (string.IsNullOrEmpty(text) || Measure(text) <= width) return text ?? "";
-            string cut = text;
-            while (cut.Length > 1 && Measure(cut.TrimEnd() + "…") > width) cut = cut.Substring(0, cut.Length - 1);
-            return cut.TrimEnd() + "…";
+            if (string.IsNullOrEmpty(text)) return "";
+            if (Measure(text) <= width) return text;
+            int n = Art.Text.Fits(text, width - Measure("…"));
+            return text.Substring(0, Math.Max(1, n)).TrimEnd() + "…";
         }
 
         private int Put(BitmapFont font, string text, int x, int y, Align align, int scale, bool clear)

@@ -30,12 +30,17 @@ namespace EdcRadio
             (c >= 32 && c < 127) || (c >= 160 && c < 384) || (c >= 0x400 && c < 0x500)
             || (c >= 0x2010 && c < 0x2070) || c == 0x2116 || (c >= 0x2190 && c < 0x2196) || c == 0x20AC;
 
-        public static BitmapFont FromGrid(Bitmap sheet, int cell = 8, int first = 32, int columns = 32)
+        public static BitmapFont FromGrid(Bitmap sheet, int cell = 8, int first = 32)
         {
             if (sheet == null) return null;
+            int columns = sheet.Width / cell, rows = sheet.Height / cell;
+            if (columns * rows < 127 - first)
+            {
+                sheet.Dispose();
+                return null;
+            }
             var font = new BitmapFont { _sheet = sheet, Height = cell };
-            int count = sheet.Width / cell * (sheet.Height / cell);
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < columns * rows; i++)
                 font._glyphs[first + i] = new Glyph
                 {
                     Source = new Rectangle(i % columns * cell, i / columns * cell, cell, cell),
@@ -46,9 +51,9 @@ namespace EdcRadio
 
         public static BitmapFont FromBmFont(string xml, Func<Rectangle, Bitmap> crop)
         {
-            Match common = Regex.Match(xml, "<common[^>]*\\blineHeight=\"(\\d+)\"");
+            Match common = Regex.Match(xml, "<common[^>]*\\blineHeight=\"([0-9]+)\"");
             var raw = new List<(int id, Rectangle r, int ox, int oy, int adv)>();
-            foreach (Match m in Regex.Matches(xml, "<char\\s+id=\"(\\d+)\"\\s+x=\"(\\d+)\"\\s+y=\"(\\d+)\"\\s+width=\"(\\d+)\"\\s+height=\"(\\d+)\"\\s+xoffset=\"(-?\\d+)\"\\s+yoffset=\"(-?\\d+)\"\\s+xadvance=\"(-?\\d+)\""))
+            foreach (Match m in Regex.Matches(xml, "<char\\s+id=\"([0-9]+)\"\\s+x=\"([0-9]+)\"\\s+y=\"([0-9]+)\"\\s+width=\"([0-9]+)\"\\s+height=\"([0-9]+)\"\\s+xoffset=\"(-?[0-9]+)\"\\s+yoffset=\"(-?[0-9]+)\"\\s+xadvance=\"(-?[0-9]+)\""))
             {
                 int id = Int(m, 1);
                 if (!Wanted(id)) continue;
@@ -56,7 +61,7 @@ namespace EdcRadio
             }
             if (!raw.Any(g => g.id == '?') || !raw.Any(g => g.r.Width > 0 && g.r.Height > 0)) return null;
             Rectangle box = raw.Where(g => g.r.Width > 0 && g.r.Height > 0).Select(g => g.r).Aggregate(Rectangle.Union);
-            int line = common.Success ? Int(common, 1) : 13;
+            int line = common.Success ? Math.Max(6, Math.Min(64, Int(common, 1))) : 13;
             const int width = 512;
             int rowHeight = Math.Max(line, raw.Max(g => g.r.Height));
             int px = 0, py = 0;
@@ -177,6 +182,19 @@ namespace EdcRadio
                 if (g != null) w += g.Advance;
             }
             return w;
+        }
+
+        public int Fits(string text, int width)
+        {
+            int w = 0;
+            for (int i = 0; i < text.Length; i++)
+            {
+                Glyph g = Find(text[i]);
+                if (g == null) continue;
+                if (w + g.Advance > width) return i;
+                w += g.Advance;
+            }
+            return text.Length;
         }
 
         public Bitmap Render(string text)

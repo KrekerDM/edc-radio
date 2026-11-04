@@ -48,15 +48,16 @@ namespace EdcRadio
                 }
                 catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is InvalidDataException
                                           || e is NotSupportedException || e is ArgumentException || e is IndexOutOfRangeException
-                                          || e is OverflowException || e is ExternalException || e is OutOfMemoryException
-                                          || e is InvalidOperationException)
+                                          || e is OverflowException || e is FormatException || e is ExternalException
+                                          || e is OutOfMemoryException || e is InvalidOperationException)
                 {
-                    art.Dispose();
-                    art = new Art();
                 }
             }
-            if (!art.FromGame) art.UseOwn();
-            return art;
+            if (art.FromGame) return art;
+            art.Dispose();
+            var own = new Art();
+            own.UseOwn();
+            return own;
         }
 
         private void ReadGame(string path)

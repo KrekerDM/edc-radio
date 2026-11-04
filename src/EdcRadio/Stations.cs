@@ -55,8 +55,13 @@ namespace EdcRadio
                 },
                 new Station { Frequency = 107.9f, Id = "night", Tempo = 10f, Playlist = new[] { "shut down", "rainless (hum)" } },
             };
+            string[] wanted = stations.Where(s => s.Playlist != null).SelectMany(s => s.Playlist).Select(Library.Normalize).Distinct().ToArray();
+            List<Track> playable = album.Where(t => t.Length > TimeSpan.Zero).ToList();
+            Dictionary<string, int> hits = playable
+                .GroupBy(Folder, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.Select(t => t.Key).Distinct().Count(k => wanted.Any(w => Fits(k, w))), StringComparer.OrdinalIgnoreCase);
             var byKey = new Dictionary<string, Track>();
-            foreach (Track t in album.Where(t => t.Length > TimeSpan.Zero))
+            foreach (Track t in playable.OrderByDescending(t => hits[Folder(t)]))
                 if (!byKey.ContainsKey(t.Key)) byKey[t.Key] = t;
             foreach (Station s in stations.Where(s => s.Playlist != null))
                 foreach (string title in s.Playlist)
@@ -72,11 +77,16 @@ namespace EdcRadio
         {
             if (byKey.TryGetValue(key, out Track exact)) return exact;
             if (key.Length < 6) return null;
-            return byKey.Where(p => p.Key.StartsWith(key, StringComparison.Ordinal))
+            return byKey.Where(p => Fits(p.Key, key))
                 .OrderBy(p => p.Key.Length)
                 .Select(p => p.Value)
                 .FirstOrDefault();
         }
+
+        private static bool Fits(string key, string wanted) =>
+            key == wanted || (wanted.Length >= 6 && key.StartsWith(wanted, StringComparison.Ordinal));
+
+        private static string Folder(Track t) => System.IO.Path.GetDirectoryName(t.Path) ?? "";
 
         public static float Signal(Station s, float frequency) =>
             s == null ? 0f : Math.Max(0f, 1f - Math.Abs(frequency - s.Frequency) / Width);
